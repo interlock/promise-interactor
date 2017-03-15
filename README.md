@@ -3,10 +3,18 @@
 
 # Interactors
 
+Based on the popular ruby gem [Interactor](https://github.com/collectiveidea/interactor). Uses chainable promises to allow
+flow of completing multiple interactors.
+
+
+## TODO
+
+- Organizer pattern
+
 ## Single Pattern
 
 ```js
-class AuthenticateUser {
+class AuthenticateUser extends Interactor{
   call() {
     User.find({email: context.email}).then((user) => {
       if (user.password === context.password) {
@@ -21,16 +29,18 @@ class AuthenticateUser {
   }
 }
 
-module.exports = InteractorCreate(AuthenticateUser);
+module.exports =AuthenticateUser;
 ```
 
 Calling the interactor
 
 ```js
-(new AuthenticateUser({email, password})).call().then((context, interactor) {
+(new AuthenticateUser({email, password})).exec().then((context, interactor) {
   console.log(`User logged in: ${context.user});
 });
 
 ```
 
 ## Organization Pattern
+
+...
