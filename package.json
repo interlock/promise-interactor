@@ -1,0 +1,24 @@
+{
+  "name": "promise-interactor",
+  "version": "1.0.0",
+  "description": "Promise wrapped interactor pattern for NodeJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "promise",
+    "interactor"
+  ],
+  "author": "James Sapara",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.17.1",
+    "eslint-config-standard": "^7.0.1",
+    "mocha": "^3.2.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0"
+  }
+}
