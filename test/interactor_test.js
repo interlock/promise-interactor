@@ -5,7 +5,7 @@ const spies = require('chai-spies');
 chai.use(spies);
 
 const Promise = require('bluebird');
-const Interactor = require('../../lib/interactor/interactor');
+const Interactor = require('../src/interactor');
 
 const expect = chai.expect;
 
