@@ -29,16 +29,30 @@ class AuthenticateUser extends Interactor{
   }
 }
 
-module.exports =AuthenticateUser;
+module.exports = AuthenticateUser;
 ```
 
 Calling the interactor
 
 ```js
-(new AuthenticateUser({email, password})).exec().then((context, interactor) {
-  console.log(`User logged in: ${context.user});
+(new AuthenticateUser({email, password})).exec().then((interactor) {
+  console.log(`User logged in: ${interactor.context.user});
 });
 
+```
+
+## Rollback
+
+If your interactor rejected, you can optionally provide a rollback which will clean up
+
+```js
+class AuthenticateUser extends Interactor{
+  // If we returned a promise, it would wait on that before calling the reject
+  // otherwise this is considered a sync call and the promise is rejected immediately after
+  rollback(err) {
+    console.log(err);
+  }
+}
 ```
 
 ## Organization Pattern

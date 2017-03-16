@@ -22,36 +22,44 @@ class TestInteractor extends Interactor {
 
 describe('Interactor', function() {
 
-  it('call returns an instance', function() {
+  it('exec returns a promise', function() {
     const i = new TestInteractor();
     const p = i.exec();
-    expect(p).to.instanceOf(TestInteractor);
-    expect(p).to.instanceOf(Interactor);
+    expect(i).to.instanceOf(TestInteractor);
+    expect(p).to.instanceOf(Promise);
   });
 
   it('has promise attribute on instance', function() {
     const i = new TestInteractor();
     const p = i.exec();
-    expect(p.promise).to.instanceOf(Promise);
+    expect(i.promise).to.instanceOf(Promise);
   });
 
   it('wraps the call and still calls it', function(done) {
     const i = new TestInteractor();
-    i.exec().promise.then((context) => {
-      expect(context.called).to.equal(true);
+    i.exec().then((inst) => {
+      expect(inst.context.called).to.equal(true);
+      done();
+    });
+  });
+
+  it('returns context and interactor instance', function(done) {
+    const i = new TestInteractor();
+    i.exec().then((inst) => {
+      expect(i).to.equal(inst);
       done();
     });
   });
 
   it('can init from static exec', function(done) {
-    TestInteractor.exec().promise.then((context) => {
-      expect(context.called).to.equal(true);
+    TestInteractor.exec().then((inst) => {
+      expect(inst.context.called).to.equal(true);
       done();
     });
   });
 
   it('can handle a reject', function(done) {
-    TestInteractor.exec({ rejectMe: true }).promise.catch((err) => {
+    TestInteractor.exec({ rejectMe: true }).catch((err) => {
       expect(err.message).to.eq('You told me to!');
       done();
     });
@@ -63,7 +71,7 @@ describe('Interactor', function() {
     };
     const instance = new TestInteractor({ rejectMe: true });
     chai.spy.on(instance, 'rollback');
-    instance.exec().promise.catch(() => {
+    instance.exec().catch(() => {
       expect(instance.rollback).to.have.been.called();
       done();
     });
@@ -78,7 +86,7 @@ describe('Interactor', function() {
     };
     const instance = new TestInteractor({ rejectMe: true });
     chai.spy.on(instance, 'rollback');
-    instance.exec().promise.catch(() => {
+    instance.exec().catch(() => {
       expect(instance.rollback).to.have.been.called();
       done();
     });

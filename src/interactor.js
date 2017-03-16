@@ -40,7 +40,7 @@ class Interactor {
       this[rejectSym] = reject;
       this.call();
     });
-    return this;
+    return this.promise;
   }
 
   /**
@@ -54,7 +54,7 @@ class Interactor {
    * Access to the promise resolve, should be called from call() on success
    */
   resolve() {
-    this[resolveSym](this.context, this);
+    this[resolveSym](this);
   }
 
   /**
