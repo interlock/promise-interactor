@@ -59,6 +59,7 @@ class AuthenticateUser extends Interactor{
 
 Makes grouping interactors in sequence a little easier.
 
+```js
 class AuthUserOrganizer extends Organizer {
   constructor(context) {
     super(context);
