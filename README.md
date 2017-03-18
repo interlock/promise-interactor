@@ -57,4 +57,16 @@ class AuthenticateUser extends Interactor{
 
 ## Organization Pattern
 
+Makes grouping interactors in sequence a little easier.
+
+class AuthUserOrganizer extends Organizer {
+  constructor(context) {
+    super(context);
+    this.interactors = [AuthenticateUser, SomeOtherInteractor];
+  }
+}
+
+AuthUserOrganizer.exec({email, password}).then((i) {
+  console.log(i.context);
+});
 ...
