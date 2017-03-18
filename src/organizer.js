@@ -10,10 +10,11 @@ class Organizer extends Interactor {
 
   exec() {
     this.promise = Promise.each(this.interactors, (interactor) => {
-      return interactor.exec(this.context).promise.then((context) => {
-        this.context = context;
+      return interactor.exec(this.context).then((i) => {
+        this.context = i.context;
       });
-    });
+    }).then(() => this );
+    
     return this.promise;
   }
 }
