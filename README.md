@@ -19,12 +19,12 @@ class AuthenticateUser extends Interactor{
     User.find({email: context.email}).then((user) => {
       if (user.password === context.password) {
         this.context.user = user;
-        this.success();
+        this.resolve();
       } else {
-        this.fail(new Error("Invalid password"));
+        this.reject(new Error("Invalid password"));
       }
     }).error( (err) => {
-      this.fail(err);
+      this.reject(err);
     });
   }
 }
