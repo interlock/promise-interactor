@@ -29,6 +29,11 @@ describe('Interactor', function() {
     expect(p).to.instanceOf(Promise);
   });
 
+  it('has default state of NEW', function() {
+    const i = new TestInteractor();
+    expect(i._state).to.eql('NEW');
+  });
+
   it('has promise attribute on instance', function() {
     const i = new TestInteractor();
     const p = i.exec();
@@ -88,6 +93,36 @@ describe('Interactor', function() {
     chai.spy.on(instance, 'rollback');
     instance.exec().catch(() => {
       expect(instance.rollback).to.have.been.called();
+      done();
+    });
+  });
+
+  it('calls before if it exists', function(done) {
+    TestInteractor.prototype.before = function() {
+      this.context.before = true;
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    };
+    const instance = new TestInteractor({ rejectMe: false });
+    chai.spy.on(instance, 'before');
+    instance.exec().then(() => {
+      expect(instance.before).to.have.been.called();
+      done();
+    });
+  });
+
+  it('calls after if it exists', function(done) {
+    TestInteractor.prototype.after = function() {
+      this.context.after = true;
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    };
+    const instance = new TestInteractor({ rejectMe: false });
+    chai.spy.on(instance, 'after');
+    instance.exec().then(() => {
+      expect(instance.after).to.have.been.called();
       done();
     });
   });

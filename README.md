@@ -14,7 +14,13 @@ flow of completing multiple interactors.
 ## Single Pattern
 
 ```js
-class AuthenticateUser extends Interactor{
+class AuthenticateUser extends Interactor {
+  
+  // optional before, if it returns a promise it is inserted in the promise chain
+  before() {
+    return Promise.resolve(true);
+  }
+  
   call() {
     User.find({email: context.email}).then((user) => {
       if (user.password === context.password) {
@@ -26,6 +32,12 @@ class AuthenticateUser extends Interactor{
     }).error( (err) => {
       this.reject(err);
     });
+  }
+  
+  // optional after, if it returns a promise it is inserted in the promise chain
+  // just before we resolve the root promise
+  after() {
+    return Promise.resolve(true);
   }
 }
 

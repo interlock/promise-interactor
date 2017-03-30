@@ -1,3 +1,5 @@
+const EventEmitter = require('events');
+
 const Promise = require('bluebird');
 
 const resolveSym = Symbol('resolve');
@@ -16,6 +18,7 @@ class Interactor {
   constructor(context) {
     this.context = context || {};
     this.promise = null;
+    this._state = 'NEW';
     this[resolveSym] = null;
     this[rejectSym] = null;
   }
@@ -38,7 +41,21 @@ class Interactor {
     this.promise = new Promise((resolve, reject) => {
       this[resolveSym] = resolve;
       this[rejectSym] = reject;
-      this.call();
+      let root = Promise.resolve();
+      if (typeof this.before === 'function') {
+        this._state = 'BEFORE';
+        const beforePromise = this.before();
+        if (beforePromise instanceof Promise === true) {
+          this.root = beforePromise;
+        }
+      }
+      root.then(() => {
+        this._state = 'CALL';
+        this.call();
+      }).catch((err) => {
+        this.reject(err);
+      });
+
     });
     return this.promise;
   }
@@ -54,6 +71,18 @@ class Interactor {
    * Access to the promise resolve, should be called from call() on success
    */
   resolve() {
+    if (typeof this.after === 'function') {
+      this._state = 'AFTER';
+      const afterPromise = this.after();
+      if (afterPromise instanceof Promise === true) {
+        afterPromise.then(() => {
+          this._state = 'RESOLVED';
+          this[resolveSym](this);
+        }).catch(this.reject);
+        return;
+      }
+    }
+    this._state = 'RESOLVED';
     this[resolveSym](this);
   }
 
@@ -63,7 +92,7 @@ class Interactor {
    * @param {*} err 
    */
   reject(err) {
-    if (typeof this.rollback === 'function') {
+    if (typeof this.rollback === 'function' && this._state == 'CALL') {
       const rollbackPromise = this.rollback();
       if (rollbackPromise instanceof Promise === true) {
         rollbackPromise.finally(() => {
@@ -72,6 +101,7 @@ class Interactor {
         return; // early exit
       }
     }
+    this._state = 'REJECTED';
     this[rejectSym](err);
   }
 }
