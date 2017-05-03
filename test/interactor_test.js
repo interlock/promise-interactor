@@ -14,6 +14,10 @@ class TestInteractor extends Interactor {
         this.context.called = true;
         if (this.context.rejectMe) {
             this.reject(new Error('You told me to!'));
+        } else if (this.context.rejectDeep) {
+            Promise.reject(new Error('You told me to!')).catch(this.reject);
+        } else if (this.context.resolveDeep) {
+            Promise.resolve().then(this.resolve);
         } else {
             this.resolve();
         }
@@ -68,6 +72,20 @@ describe('Interactor', function() {
             expect(err.message).to.eq('You told me to!');
             done();
         });
+    });
+
+    it('has reject bound to instance context', function(done) {
+      TestInteractor.exec({ rejectDeep: true }).catch((err) => {
+          expect(err.message).to.eq('You told me to!');
+          done();
+      });
+    });
+
+    it('has resolve bound to instance context', function(done) {
+      TestInteractor.exec({ resolveDeep: true }).then((instance) => {
+          
+          done();
+      });
     });
 
     it('calls rollback if it exists for an error', function(done) {
