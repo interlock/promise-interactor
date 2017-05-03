@@ -23,6 +23,6 @@ IN THE SOFTWARE.
 */
 
 module.exports = {
-    Interactor: require('./src/interactor'),
-    Organizer: require('./src/organizer'),
+  Interactor: require('./src/interactor'),
+  Organizer: require('./src/organizer'),
 };
