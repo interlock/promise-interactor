@@ -19,6 +19,8 @@ class Interactor {
         this._state = 'NEW';
         this[resolveSym] = null;
         this[rejectSym] = null;
+        this.resolve = this.resolve.bind(this);
+        this.reject = this.reject.bind(this);
     }
 
   /**
