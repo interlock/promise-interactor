@@ -4,7 +4,8 @@
   "description": "Promise wrapped interactor pattern for NodeJS",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "eslint ."
   },
   "repository" : {
     "type" : "git",
