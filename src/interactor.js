@@ -95,8 +95,12 @@ class Interactor {
     if (typeof this.rollback === 'function' && this._state == 'CALL') {
       const rollbackPromise = this.rollback();
       if (rollbackPromise instanceof Promise === true) {
-        rollbackPromise.finally(() => {
+        rollbackPromise
+        .then(() => {
           this[rejectSym](err);
+        })
+        .catch((newErr) => {
+          this[rejectSym](newErr);
         });
         return; // early exit
       }
