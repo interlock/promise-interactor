@@ -2,6 +2,8 @@ const chai = require('chai');
 // TODO refactor in to test helper
 const spies = require('chai-spies');
 
+const Promise = require('bluebird');
+
 chai.use(spies);
 
 const Interactor = require('../src/interactor');
@@ -42,5 +44,36 @@ describe('Organizer', function() {
     return org.exec().then((org) => {
       expect(org.context.count).to.equal(2);
     });
+  });
+
+  context('rollback', () => {
+    it('called if one fails', () => {
+      class TestOrgWithRollback extends TestOrganizer {
+        rollback(err) {
+          return Promise.resolve();
+        }
+      }
+      const org = new TestOrgWithRollback({ count: 0, rejectMe: true });
+
+      chai.spy.on(org, 'rollback');
+      return org.exec().catch((err) => {
+        expect(org.rollback).to.have.been.called();
+      });
+    });
+
+    it('replaced err of reject with new one', () => {
+      class TestOrgWithRollback extends TestOrganizer {
+        rollback(err) {
+          return new Promise((resolve, reject) => {
+            reject(new Error('alternate reject'));
+          });
+        }
+      }
+      const org = new TestOrgWithRollback({ count: 0, rejectMe: true });
+
+      return org.exec().catch((err) => {
+         expect(err.message).to.equal('alternate reject');
+      });
+    })
   });
 });
