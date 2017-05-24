@@ -3,6 +3,8 @@
 
 # Interactors
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/interlock/promise-interactor.svg)](https://greenkeeper.io/)
+
 Based on the popular ruby gem [Interactor](https://github.com/collectiveidea/interactor). Uses chainable promises to allow
 flow of completing multiple interactors.
 
