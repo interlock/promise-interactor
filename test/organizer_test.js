@@ -49,21 +49,21 @@ describe('Organizer', function() {
   context('rollback', () => {
     it('called if one fails', () => {
       class TestOrgWithRollback extends TestOrganizer {
-        rollback(err) {
+        rollback() {
           return Promise.resolve();
         }
       }
       const org = new TestOrgWithRollback({ count: 0, rejectMe: true });
 
       chai.spy.on(org, 'rollback');
-      return org.exec().catch((err) => {
+      return org.exec().catch(() => {
         expect(org.rollback).to.have.been.called();
       });
     });
 
     it('replaced err of reject with new one', () => {
       class TestOrgWithRollback extends TestOrganizer {
-        rollback(err) {
+        rollback() {
           return new Promise((resolve, reject) => {
             reject(new Error('alternate reject'));
           });
@@ -72,8 +72,8 @@ describe('Organizer', function() {
       const org = new TestOrgWithRollback({ count: 0, rejectMe: true });
 
       return org.exec().catch((err) => {
-         expect(err.message).to.equal('alternate reject');
+        expect(err.message).to.equal('alternate reject');
       });
-    })
+    });
   });
 });

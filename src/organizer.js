@@ -15,7 +15,7 @@ class Organizer extends Interactor {
     this.promise = new Promise((resolve, reject) => {
       this[resolveSym] = resolve;
       this[rejectSym] = reject;
-      this.state = 'CALL'
+      this.state = 'CALL';
       let root = Promise.each(this.interactors, (interactor) => {
         return interactor.exec(this.context).then((i) => {
           this.context = i.context;
