@@ -8,10 +8,6 @@ Based on the popular ruby gem [Interactor](https://github.com/collectiveidea/int
 flow of completing multiple interactors.
 
 
-## TODO
-
-- Organizer pattern
-
 ## Single Pattern
 
 ```js
