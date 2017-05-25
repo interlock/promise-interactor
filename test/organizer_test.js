@@ -16,7 +16,7 @@ class TestInteractor extends Interactor {
     this.context.called = true;
     this.context.count += 1;
     if (this.context.rejectMe) {
-      this.reject(new Error('You told me to!'));
+      this.reject(this.context.error || new Error('You told me to!'));
     } else {
       this.resolve();
     }
@@ -47,6 +47,21 @@ describe('Organizer', function() {
   });
 
   context('rollback', () => {
+
+    it('called with rejection err', () => {
+      class TestOrgWithRollback extends TestOrganizer {
+        rollback() {
+          return Promise.resolve();
+        }
+      }
+      const error = new Error('squirrel!');
+      const org = new TestOrgWithRollback({ count: 0, rejectMe: true, error });
+
+      chai.spy.on(org, 'rollback');
+      return org.exec().catch(() => {
+        expect(org.rollback).to.have.been.called.with(error);
+      });
+    });
     it('called if one fails', () => {
       class TestOrgWithRollback extends TestOrganizer {
         rollback() {
