@@ -8,12 +8,12 @@ describe('promise', () => {
   context('isPromise', () => {
 
     it('detects built-in promise', () => {
-      const p = new global.Promise((r,e) => { r(); });
+      const p = new global.Promise((r) => { r(); });
       expect(promise.isPromise(p)).to.be.true;
     });
 
     it('detects bluebird as promise', () => {
-      const p = new BlueBirdPromise((r,e) => { r(); });
+      const p = new BlueBirdPromise((r) => { r(); });
       expect(promise.isPromise(p)).to.be.true;
     });
 
@@ -23,6 +23,6 @@ describe('promise', () => {
 
     it('returns false for undefined', () => {
       expect(promise.isPromise(undefined)).to.not.be.true;
-    })
+    });
   });
 });

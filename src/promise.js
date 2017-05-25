@@ -8,6 +8,6 @@ const isPromise = function(p) {
     return true;
   }
   return false;
-}
+};
 
 module.exports = { isPromise };
