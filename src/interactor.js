@@ -1,6 +1,6 @@
 const Promise = require('bluebird');
+const promise = require('./promise');
 
-Symbol.for('resolve');
 const resolveSym = Symbol.for('resolve');
 const rejectSym = Symbol.for('reject');
 
@@ -54,7 +54,7 @@ class Interactor {
       if (typeof this.before === 'function') {
         this.state = 'BEFORE';
         const beforePromise = this.before();
-        if (beforePromise instanceof Promise === true) {
+        if (promise.isPromise(beforePromise) === true) {
           this.root = beforePromise;
         }
       }
@@ -83,7 +83,7 @@ class Interactor {
     if (typeof this.after === 'function') {
       this.state = 'AFTER';
       const afterPromise = this.after();
-      if (afterPromise instanceof Promise === true) {
+      if (promise.isPromise(afterPromise) === true) {
         afterPromise.then(() => {
           this.state = 'RESOLVED';
           this[resolveSym](this);
@@ -103,7 +103,7 @@ class Interactor {
   reject(err) {
     if (typeof this.rollback === 'function' && this.state == 'CALL') {
       const rollbackPromise = this.rollback(err);
-      if (rollbackPromise instanceof Promise === true) {
+      if (promise.isPromise(rollbackPromise) === true) {
         rollbackPromise
         .then(() => {
           this[rejectSym](err);

@@ -58,8 +58,9 @@ describe('Organizer', function() {
       const org = new TestOrgWithRollback({ count: 0, rejectMe: true, error });
 
       chai.spy.on(org, 'rollback');
-      return org.exec().catch(() => {
+      return org.exec().catch((err) => {
         expect(org.rollback).to.have.been.called.with(error);
+        expect(err).to.equal(error);
       });
     });
     it('called if one fails', () => {
