@@ -1,4 +1,6 @@
-baseURL = "https://interlock.github.io/promise-interactor"
+baseURL = "https://interlock.github.io/promise-interactor/"
+# relativeURLs = true
+canonifyURLs = true
 languageCode = "en-us"
 title = "Promise Interactor"
 theme = "kube"
