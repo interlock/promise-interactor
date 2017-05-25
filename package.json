@@ -7,6 +7,7 @@
     "test": "mocha",
     "lint": "eslint ."
   },
+  "homepage": "https://interlock.github.io/promise-interactor",
   "repository" : {
     "type" : "git",
     "url" : "https://github.com/interlock/promise-interactor.git"

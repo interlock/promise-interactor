@@ -1,4 +1,4 @@
-baseURL = "http://example.org/"
+baseURL = "https://interlock.github.io/promise-interactor"
 languageCode = "en-us"
 title = "Promise Interactor"
 theme = "kube"
