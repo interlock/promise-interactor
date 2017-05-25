@@ -1,0 +1,33 @@
+{{ define "title"}} {{ .Site.Title}} {{end}}
+{{ define "header"}} {{ partial "header" .}} {{end}}
+{{ define "main"}}
+
+<div id="main">
+  <div id="hero">
+    <h1>{{.Title}}</h1>
+    <p>{{.Description}}</p>
+  </div>
+  <div id="action-buttons">
+    <a class="button primary big" href="https://github.com/interlock/promise-interactor">View on Github</a>
+  </div>
+
+  <div id="kube-features">
+    <div class="row gutters">
+      <div class="col col-4 item">
+        <h4>Only one dependency</h4>
+        <p>We use bluebird internally, but feel free to use any Promise library you like.</p>
+      </div>
+      <div class="col col-4 item">
+        <h4>NodeJS and Browser</h4>
+        <p>Promise Interactor works in all browsers that support ES5, plus NodeJS of course.</p>
+      </div>
+      <div class="col col-4 item">
+        <h4>License</h4>
+        <p>Promise Interactor licensed under <a href="http://opensource.org/licenses/MIT">MIT</a>.<br>
+      Promise Interactor is absolutely free for personal or commercial use.</p>
+    </div>
+  </div>
+</div>
+</div>
+{{ end }}
+{{ define "footer"}} {{ partial "footer" .}} {{end}}
