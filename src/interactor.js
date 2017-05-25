@@ -102,7 +102,7 @@ class Interactor {
    */
   reject(err) {
     if (typeof this.rollback === 'function' && this.state == 'CALL') {
-      const rollbackPromise = this.rollback();
+      const rollbackPromise = this.rollback(err);
       if (rollbackPromise instanceof Promise === true) {
         rollbackPromise
         .then(() => {
