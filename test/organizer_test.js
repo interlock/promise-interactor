@@ -79,7 +79,7 @@ describe('Organizer', function() {
         expect(org.context.beforeCalled).to.be.true;
         expect(org.before).to.have.been.called;
       }).then(done);
-    })
+    });
   });
 
   context('rollback', () => {

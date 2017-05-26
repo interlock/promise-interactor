@@ -4,13 +4,13 @@
   "description": "Promise wrapped interactor pattern for NodeJS",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "lint": "eslint ."
+    "test": "npm run lint && mocha",
+    "lint": "eslint ./src ./test"
   },
   "homepage": "https://interlock.github.io/promise-interactor",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/interlock/promise-interactor.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/interlock/promise-interactor.git"
   },
   "keywords": [
     "promise",
@@ -18,12 +18,14 @@
   ],
   "author": "James Sapara",
   "license": "MIT",
-
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
     "eslint": "^3.17.1",
     "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-node": "^4.2.2",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.2.0"
   },
   "dependencies": {
