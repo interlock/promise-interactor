@@ -1,6 +1,7 @@
-const Promise = require('bluebird');
+const Bluebird = require('bluebird');
 
 const Interactor = require('./interactor');
+const promise = require('./promise');
 
 const resolveSym = Symbol.for('resolve');
 const rejectSym = Symbol.for('reject');
@@ -15,11 +16,23 @@ class Organizer extends Interactor {
     this.promise = new Promise((resolve, reject) => {
       this[resolveSym] = resolve;
       this[rejectSym] = reject;
+      let root = Promise.resolve();
+      if (typeof this.before === 'function') {
+        this.state = 'BEFORE';
+        root = root.then(() => {
+          return this.before();
+        });
+      }
       this.state = 'CALL';
-      let root = Promise.each(this.interactors, (interactor) => {
-        return interactor.exec(this.context).then((i) => {
+      // insert attempts at running each interactor
+      this.interactors.forEach((interactor) => {
+        root = root.then(() => {
+          return interactor.exec(this.context)
+        })
+        .then((i) => {
           this.context = i.context;
         });
+
       });
 
       root.then(() => {

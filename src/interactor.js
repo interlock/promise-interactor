@@ -55,7 +55,7 @@ class Interactor {
         this.state = 'BEFORE';
         const beforePromise = this.before();
         if (promise.isPromise(beforePromise) === true) {
-          this.root = beforePromise;
+          root = beforePromise;
         }
       }
       root.then(() => {

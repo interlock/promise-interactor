@@ -46,6 +46,42 @@ describe('Organizer', function() {
     });
   });
 
+  context('before', () => {
+    it('called if defined', (done) => {
+      class TestOrgWithBefore extends TestOrganizer {
+        before() {
+          this.context.beforeCalled = true;
+          return Promise.resolve();
+        }
+      }
+      const org = new TestOrgWithBefore();
+      chai.spy.on(org, 'before');
+
+      org.exec().then(() => {
+        expect(org.context.beforeCalled).to.be.true;
+        expect(org.before).to.have.been.called;
+        done();
+      });
+    });
+
+    it('rejects immediately if the before returns a rejected promise', (done) => {
+      class TestOrgWithBefore extends TestOrganizer {
+        before() {
+          this.context.beforeCalled = true;
+          return Promise.reject(new Error('Taco not included'));
+        }
+      }
+      const org = new TestOrgWithBefore();
+      chai.spy.on(org, 'before');
+
+      org.exec().catch((err) => {
+        expect(err.message).to.equal('Taco not included');
+        expect(org.context.beforeCalled).to.be.true;
+        expect(org.before).to.have.been.called;
+      }).then(done);
+    })
+  });
+
   context('rollback', () => {
 
     it('called with rejection err', () => {
