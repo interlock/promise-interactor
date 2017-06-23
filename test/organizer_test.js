@@ -13,10 +13,13 @@ const expect = chai.expect;
 
 class TestInteractor extends Interactor {
   call() {
+
     this.context.called = true;
     this.context.count += 1;
     if (this.context.rejectMe) {
       this.reject(this.context.error || new Error('You told me to!'));
+    } else if (this.context.rejectOn && this.context.rejectOn == this.context.count) {
+      this.reject(this.context.error || new Error(`Reject on error count: ${this.context.count}`));
     } else {
       this.resolve();
     }
@@ -42,6 +45,16 @@ describe('Organizer', function() {
     const org = new TestOrganizer({count: 0});
     org.interactors.push(TestInteractor);
     return org.exec().then((org) => {
+      expect(org.context.count).to.equal(2);
+    });
+  });
+
+  it('multiple does not chain calls on reject', function() {
+    const org = new TestOrganizer({count: 0, rejectOn: 2});
+    org.interactors.push(TestInteractor);
+    org.interactors.push(TestInteractor);
+    return org.exec().catch((error) => {
+      expect(error.message).to.equal('Reject on error count: 2');
       expect(org.context.count).to.equal(2);
     });
   });
