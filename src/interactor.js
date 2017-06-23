@@ -60,7 +60,7 @@ class Interactor {
       }
       root.then(() => {
         this.state = 'CALL';
-        this.call();
+        return this.call();
       }).catch((err) => {
         this.reject(err);
       });
