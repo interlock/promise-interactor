@@ -60,7 +60,8 @@ class Interactor {
       }
       root.then(() => {
         this.state = 'CALL';
-        return this.call();
+        this.call();
+        return null;
       }).catch((err) => {
         this.reject(err);
       });
@@ -87,6 +88,7 @@ class Interactor {
         afterPromise.then(() => {
           this.state = 'RESOLVED';
           this[resolveSym](this);
+          return null;
         }).catch(this.reject);
         return;
       }
@@ -107,6 +109,7 @@ class Interactor {
         rollbackPromise
         .then(() => {
           this[rejectSym](err);
+          return null;
         })
         .catch((newErr) => {
           this[rejectSym](newErr);

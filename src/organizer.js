@@ -28,12 +28,14 @@ class Organizer extends Interactor {
         })
         .then((i) => {
           this.context = i.context;
+          return null;
         });
 
       });
 
       root.then(() => {
         this.resolve();
+        return null;
       }).catch((err) => {
         this.reject(err);
       });
