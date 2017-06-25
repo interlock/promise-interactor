@@ -31,8 +31,7 @@ class Organizer extends Interactor {
         this.organize().forEach((interactor) => {
           root = root.then(() => {
             return interactor.exec(this.context);
-          })
-          .then((i) => {
+          }).then((i) => {
             this.context = i.context;
             return null;
           });

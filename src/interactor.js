@@ -1,4 +1,3 @@
-const Promise = require('bluebird');
 const promise = require('./promise');
 
 const resolveSym = Symbol.for('resolve');
@@ -106,12 +105,10 @@ class Interactor {
     if (typeof this.rollback === 'function' && this.state == 'CALL') {
       const rollbackPromise = this.rollback(err);
       if (promise.isPromise(rollbackPromise) === true) {
-        rollbackPromise
-        .then(() => {
+        rollbackPromise.then(() => {
           this[rejectSym](err);
           return null;
-        })
-        .catch((newErr) => {
+        }).catch((newErr) => {
           this[rejectSym](newErr);
         });
         return; // early exit
