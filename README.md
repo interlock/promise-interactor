@@ -12,12 +12,12 @@ flow of completing multiple interactors.
 
 ```js
 class AuthenticateUser extends Interactor {
-  
+
   // optional before, if it returns a promise it is inserted in the promise chain
   before() {
     return Promise.resolve(true);
   }
-  
+
   call() {
     User.find({email: context.email}).then((user) => {
       if (user.password === context.password) {
@@ -30,7 +30,7 @@ class AuthenticateUser extends Interactor {
       this.reject(err);
     });
   }
-  
+
   // optional after, if it returns a promise it is inserted in the promise chain
   // just before we resolve the root promise
   after() {
@@ -70,9 +70,9 @@ Makes grouping interactors in sequence a little easier.
 
 ```js
 class AuthUserOrganizer extends Organizer {
-  constructor(context) {
-    super(context);
-    this.interactors = [AuthenticateUser, SomeOtherInteractor];
+
+  organize() {
+    return [AuthenticateUser, SomeOtherInteractor];
   }
 }
 
