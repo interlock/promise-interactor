@@ -1,4 +1,3 @@
-const Promise = require('bluebird');
 const promise = require('./promise');
 
 const resolveSym = Symbol.for('resolve');

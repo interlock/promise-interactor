@@ -2,8 +2,6 @@ const chai = require('chai');
 // TODO refactor in to test helper
 const spies = require('chai-spies');
 
-const Promise = require('bluebird');
-
 chai.use(spies);
 
 const Interactor = require('../src/interactor');
