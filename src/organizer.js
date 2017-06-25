@@ -6,7 +6,12 @@ const rejectSym = Symbol.for('reject');
 class Organizer extends Interactor {
   constructor(context) {
     super(context);
-    this.interactors = [];
+  }
+
+  organize() {
+    // TODO setting this.interactors in constructor will be depreciated
+    if (this.interactors) return this.interactors;
+    throw new Error('organize must be implemented');
   }
 
   exec() {
@@ -22,16 +27,20 @@ class Organizer extends Interactor {
       }
       this.state = 'CALL';
       // insert attempts at running each interactor
-      this.interactors.forEach((interactor) => {
-        root = root.then(() => {
-          return interactor.exec(this.context);
-        })
-        .then((i) => {
-          this.context = i.context;
-          return null;
+      try {
+        this.organize().forEach((interactor) => {
+          root = root.then(() => {
+            return interactor.exec(this.context);
+          })
+          .then((i) => {
+            this.context = i.context;
+            return null;
+          });
         });
-
-      });
+      } catch (err) {
+        this.reject(err);
+        return null;
+      }
 
       root.then(() => {
         this.resolve();

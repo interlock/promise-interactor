@@ -29,13 +29,44 @@ class TestInteractor extends Interactor {
 class TestOrganizer extends Organizer {
   constructor(context) {
     super(context);
-    this.interactors = [TestInteractor];
   }
 }
 
 describe('Organizer', function() {
+
+  describe('organize', function() {
+    it('calls organize to get interactors', () => {
+      const org = new TestOrganizer({count: 0});
+      org.organize = () => [TestInteractor];
+      chai.spy.on(org, 'organize');
+
+
+      return org.exec()
+      .then(() => {
+        expect(org.organize).to.have.been.called();
+      });
+    });
+
+    it('defaults to throwing an exception if not implemented', () => {
+      const org = new TestOrganizer({count: 0});
+      delete org.organize;
+      expect(org.organize).to.throw();
+    });
+
+    it('rejects if organize throws exception', () => {
+      const org = new TestOrganizer({count: 0});
+
+      return org.exec()
+      .catch((err) => {
+        expect(err.message).to.equal('organize must be implemented');
+        return null;
+      });
+    });
+  });
+
   it('single works', function() {
     const org = new TestOrganizer({count: 0});
+    org.organize = () => [TestInteractor];
     return org.exec().then((org) => {
       expect(org.context.count).to.equal(1);
     });
@@ -43,7 +74,7 @@ describe('Organizer', function() {
 
   it('multiple works', function() {
     const org = new TestOrganizer({count: 0});
-    org.interactors.push(TestInteractor);
+    org.organize = () => [TestInteractor, TestInteractor];
     return org.exec().then((org) => {
       expect(org.context.count).to.equal(2);
     });
@@ -51,8 +82,7 @@ describe('Organizer', function() {
 
   it('multiple does not chain calls on reject', function() {
     const org = new TestOrganizer({count: 0, rejectOn: 2});
-    org.interactors.push(TestInteractor);
-    org.interactors.push(TestInteractor);
+    org.organize = () => [TestInteractor, TestInteractor, TestInteractor];
     return org.exec().catch((error) => {
       expect(error.message).to.equal('Reject on error count: 2');
       expect(org.context.count).to.equal(2);
@@ -68,6 +98,7 @@ describe('Organizer', function() {
         }
       }
       const org = new TestOrgWithBefore();
+      org.organize = () => [TestInteractor];
       chai.spy.on(org, 'before');
 
       org.exec().then(() => {
@@ -85,6 +116,7 @@ describe('Organizer', function() {
         }
       }
       const org = new TestOrgWithBefore();
+      org.organize = () => [TestInteractor];
       chai.spy.on(org, 'before');
 
       org.exec().catch((err) => {
@@ -105,13 +137,14 @@ describe('Organizer', function() {
       }
       const error = new Error('squirrel!');
       const org = new TestOrgWithRollback({ count: 0, rejectMe: true, error });
-
+      org.organize = () => [TestInteractor];
       chai.spy.on(org, 'rollback');
       return org.exec().catch((err) => {
         expect(org.rollback).to.have.been.called.with(error);
         expect(err).to.equal(error);
       });
     });
+
     it('called if one fails', () => {
       class TestOrgWithRollback extends TestOrganizer {
         rollback() {
@@ -119,7 +152,7 @@ describe('Organizer', function() {
         }
       }
       const org = new TestOrgWithRollback({ count: 0, rejectMe: true });
-
+      org.organize = () => [TestInteractor];
       chai.spy.on(org, 'rollback');
       return org.exec().catch(() => {
         expect(org.rollback).to.have.been.called();
@@ -135,7 +168,7 @@ describe('Organizer', function() {
         }
       }
       const org = new TestOrgWithRollback({ count: 0, rejectMe: true });
-
+      org.organize = () => [TestInteractor];
       return org.exec().catch((err) => {
         expect(err.message).to.equal('alternate reject');
       });
