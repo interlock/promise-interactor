@@ -39,8 +39,7 @@ describe('Organizer', function() {
       chai.spy.on(org, 'organize');
 
 
-      return org.exec()
-      .then(() => {
+      return org.exec().then(() => {
         expect(org.organize).to.have.been.called();
       });
     });
@@ -54,8 +53,7 @@ describe('Organizer', function() {
     it('rejects if organize throws exception', () => {
       const org = new TestOrganizer({count: 0});
 
-      return org.exec()
-      .catch((err) => {
+      return org.exec().catch((err) => {
         expect(err.message).to.equal('organize must be implemented');
         return null;
       });
