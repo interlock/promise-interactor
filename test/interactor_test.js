@@ -5,6 +5,7 @@ const spies = require('chai-spies');
 chai.use(spies);
 
 const Interactor = require('../src/interactor');
+const states = require('../src/states');
 
 const expect = chai.expect;
 
@@ -30,11 +31,6 @@ describe('Interactor', function() {
     const p = i.exec();
     expect(i).to.instanceOf(TestInteractor);
     expect(p).to.instanceOf(Promise);
-  });
-
-  it('has default state of NEW', function() {
-    const i = new TestInteractor();
-    expect(i._state).to.eql('NEW');
   });
 
   it('has promise attribute on instance', function() {
@@ -89,25 +85,28 @@ describe('Interactor', function() {
   context('rollback', () => {
 
     it('gets called if it exists for an error', function(done) {
-      TestInteractor.prototype.rollback = function() {
+      const instance = new TestInteractor({ rejectMe: true });
+      instance.rollback = function() {
         this.context.rolledback = true;
       };
-      const instance = new TestInteractor({ rejectMe: true });
       chai.spy.on(instance, 'rollback');
-      instance.exec().catch(() => {
+      instance.exec().then(() => {
+        expect(instance.state).to.equal('REJECTED');
+        done();
+      }).catch(() => {
         expect(instance.rollback).to.have.been.called();
         done();
       });
     });
 
     it('handles call with promise return', function(done) {
-      TestInteractor.prototype.rollback = function() {
+      const instance = new TestInteractor({ rejectMe: true });
+      instance.rollback = function() {
         this.context.rolledback = true;
         return new Promise((resolve) => {
           resolve();
         });
       };
-      const instance = new TestInteractor({ rejectMe: true });
       chai.spy.on(instance, 'rollback');
       instance.exec().catch(() => {
         expect(instance.rollback).to.have.been.called();
@@ -116,13 +115,13 @@ describe('Interactor', function() {
     });
 
     it('passed original error down if no rejects occure', (done) => {
-      TestInteractor.prototype.rollback = function() {
+      const instance = new TestInteractor({ rejectMe: true });
+      instance.rollback = function() {
         this.context.rolledback = true;
         return new Promise((resolve) => {
           resolve();
         });
       };
-      const instance = new TestInteractor({ rejectMe: true });
       chai.spy.on(instance, 'rollback');
       instance.exec().catch((err) => {
         expect(err.message).to.eq('You told me to!');
@@ -131,13 +130,13 @@ describe('Interactor', function() {
     });
 
     it('uses promise reject as new error', function(done) {
-      TestInteractor.prototype.rollback = function() {
+      const instance = new TestInteractor({ rejectMe: true });
+      instance.rollback = function() {
         this.context.rolledback = true;
         return new Promise((resolve, reject) => {
           reject(new Error('cat in the hat'));
         });
       };
-      const instance = new TestInteractor({ rejectMe: true });
       chai.spy.on(instance, 'rollback');
       instance.exec().catch((err) => {
         expect(err.message).to.eq('cat in the hat');
@@ -147,13 +146,13 @@ describe('Interactor', function() {
   });
 
   it('calls before if it exists', function(done) {
-    TestInteractor.prototype.before = function() {
+    const instance = new TestInteractor({ rejectMe: false });
+    instance.before = function() {
       this.context.before = true;
       return new Promise((resolve) => {
         resolve();
       });
     };
-    const instance = new TestInteractor({ rejectMe: false });
     chai.spy.on(instance, 'before');
     instance.exec().then(() => {
       expect(instance.before).to.have.been.called();
@@ -162,17 +161,76 @@ describe('Interactor', function() {
   });
 
   it('calls after if it exists', function(done) {
-    TestInteractor.prototype.after = function() {
+    const instance = new TestInteractor({ rejectMe: false });
+    instance.after = function() {
       this.context.after = true;
       return new Promise((resolve) => {
         resolve();
       });
     };
-    const instance = new TestInteractor({ rejectMe: false });
     chai.spy.on(instance, 'after');
     instance.exec().then(() => {
       expect(instance.after).to.have.been.called();
       done();
+    });
+  });
+
+  describe('state', () => {
+
+    it('initially NEW', () => {
+      const i = new TestInteractor();
+      expect(i.state).to.equal(states.NEW);
+    });
+
+    it('is BEFORE when calling before', () => {
+      const i = new TestInteractor();
+      i.before = () => {
+        expect(i.state).to.equal(states.BEFORE);
+      };
+      return i.exec();
+    });
+
+    it('is CALL when in main call function', () => {
+      const i = new TestInteractor();
+      i.call = function() {
+        expect(i.state).to.equal(states.CALL);
+        this.resolve();
+      };
+      return i.exec();
+    });
+
+    it('is AFTER when calling after', () => {
+      const i = new TestInteractor();
+      i.after = () => {
+        expect(i.state).to.equal(states.AFTER);
+      };
+      return i.exec();
+    });
+
+    it('is RESOLVED when completed', (done) => {
+      const i = new TestInteractor();
+      i.exec().then(() => {
+        expect(i.state).to.equal(states.RESOLVED);
+        done();
+      });
+    });
+
+    it('is ROLLBACK when calling rollback', (done) => {
+      const i = new TestInteractor({rejectMe: true});
+      i.rollback = function() {
+        expect(i.state).to.equal(states.ROLLBACK);
+      };
+      i.exec().catch(() => {
+        done();
+      });
+    });
+
+    it('is REJECTED when not completed', (done) => {
+      const i = new TestInteractor({rejectMe: true});
+      i.exec().catch(() => {
+        expect(i.state).to.equal(states.REJECTED);
+        done();
+      });
     });
   });
 });
