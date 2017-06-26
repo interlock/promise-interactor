@@ -1,4 +1,5 @@
 const Interactor = require('./interactor');
+const states = require('./states');
 
 const resolveSym = Symbol.for('resolve');
 const rejectSym = Symbol.for('reject');
@@ -20,12 +21,12 @@ class Organizer extends Interactor {
       this[rejectSym] = reject;
       let root = Promise.resolve();
       if (typeof this.before === 'function') {
-        this.state = 'BEFORE';
+        this.state = states.BEFORE;
         root = root.then(() => {
           return this.before();
         });
       }
-      this.state = 'CALL';
+      this.state = states.CALL;
       // insert attempts at running each interactor
       try {
         this.organize().forEach((interactor) => {

@@ -1,4 +1,5 @@
 const promise = require('./promise');
+const states = require('./states');
 
 const resolveSym = Symbol.for('resolve');
 const rejectSym = Symbol.for('reject');
@@ -16,7 +17,7 @@ class Interactor {
   constructor(context) {
     this.context = context || {};
     this.promise = null;
-    this._state = 'NEW';
+    this._state = states.NEW;
     this[resolveSym] = null;
     this[rejectSym] = null;
     this.resolve = this.resolve.bind(this);
@@ -51,14 +52,14 @@ class Interactor {
       this[rejectSym] = reject;
       let root = Promise.resolve();
       if (typeof this.before === 'function') {
-        this.state = 'BEFORE';
+        this.state = states.BEFORE;
         const beforePromise = this.before();
         if (promise.isPromise(beforePromise) === true) {
           root = beforePromise;
         }
       }
       root.then(() => {
-        this.state = 'CALL';
+        this.state = states.CALL;
         this.call();
         return null;
       }).catch((err) => {
@@ -81,18 +82,18 @@ class Interactor {
    */
   resolve() {
     if (typeof this.after === 'function') {
-      this.state = 'AFTER';
+      this.state = states.AFTER;
       const afterPromise = this.after();
       if (promise.isPromise(afterPromise) === true) {
         afterPromise.then(() => {
-          this.state = 'RESOLVED';
+          this.state = states.RESOLVED;
           this[resolveSym](this);
           return null;
         }).catch(this.reject);
         return;
       }
     }
-    this.state = 'RESOLVED';
+    this.state = states.RESOLVED;
     this[resolveSym](this);
   }
 
@@ -102,9 +103,11 @@ class Interactor {
    * @param {*} err
    */
   reject(err) {
-    if (typeof this.rollback === 'function' && this.state == 'CALL') {
+    if (typeof this.rollback === 'function' && this.state == states.CALL) {
+      this.state = states.ROLLBACK;
       const rollbackPromise = this.rollback(err);
       if (promise.isPromise(rollbackPromise) === true) {
+
         rollbackPromise.then(() => {
           this[rejectSym](err);
           return null;
@@ -114,7 +117,7 @@ class Interactor {
         return; // early exit
       }
     }
-    this.state = 'REJECTED';
+    this.state = states.REJECTED;
     this[rejectSym](err);
   }
 }
