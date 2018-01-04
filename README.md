@@ -2,7 +2,8 @@
 [![Dependency Status](https://david-dm.org/interlock/promise-interactor.svg)](https://david-dm.org/interlock/promise-interactor.svg)
 [![Dev Dependency Status](https://david-dm.org/interlock/promise-interactor/dev-status.svg)](https://david-dm.org/interlock/promise-interactor/dev-status.svg)
 [![Greenkeeper badge](https://badges.greenkeeper.io/interlock/promise-interactor.svg)](https://greenkeeper.io/)
-[![Package Quality](http://npm.packagequality.com/badge/promise-interactor.png)](http://packagequality.com/#?package=promise-interactor)
+[![Package Quality](http://npm.packagequality.com/shield/promise-interactor.svg)](http://packagequality.com/#?package=promise-interactor)
+
 # Interactors
 
 Based on the popular ruby gem [Interactor](https://github.com/collectiveidea/interactor). Uses chainable promises to allow
