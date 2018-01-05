@@ -13,6 +13,10 @@ flow of completing multiple interactors.
 ## Single Pattern
 
 ```js
+import PromiseInteractor from 'promise-interactor';
+
+const { Interactor } = PromiseInteractor;
+
 class AuthenticateUser extends Interactor {
 
   // optional before, if it returns a promise it is inserted in the promise chain
@@ -21,8 +25,9 @@ class AuthenticateUser extends Interactor {
   }
 
   call() {
-    User.find({email: context.email}).then((user) => {
-      if (user.password === context.password) {
+    const { password, email } = this.context;
+    User.find({email: email}).then((user) => {
+      if (user.password === password) {
         this.context.user = user;
         this.resolve();
       } else {
@@ -46,9 +51,14 @@ module.exports = AuthenticateUser;
 Calling the interactor
 
 ```js
-(new AuthenticateUser({email, password})).exec().then((interactor) {
-  console.log(`User logged in: ${interactor.context.user});
-});
+(new AuthenticateUser({email, password}))
+  .exec()
+  .then((interactor) => {
+    console.log(`User logged in: ${interactor.context.user}`);
+  })
+  .catch((err) => {
+    console.log(`Error: ${error}`);
+  });
 
 ```
 
@@ -71,6 +81,10 @@ class AuthenticateUser extends Interactor{
 Makes grouping interactors in sequence a little easier.
 
 ```js
+import PromiseInteractor from 'promise-interactor';
+
+const { Organizer } = PromiseInteractor;
+
 class AuthUserOrganizer extends Organizer {
 
   organize() {
@@ -78,7 +92,9 @@ class AuthUserOrganizer extends Organizer {
   }
 }
 
-AuthUserOrganizer.exec({email, password}).then((i) {
-  console.log(i.context);
-});
+AuthUserOrganizer
+  .exec({email, password})
+  .then((i) => {
+    console.log(i.context);
+  });
 ...
