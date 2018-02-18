@@ -22,7 +22,7 @@
     "chai": "^4.0.1",
     "chai-spies": "git://github.com/chaijs/chai-spies.git#master",
     "eslint": "^4.1.0",
-    "eslint-config-standard": "^10.2.1",
+    "eslint-config-standard": "^11.0.0",
     "eslint-plugin-node": "^5.0.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
