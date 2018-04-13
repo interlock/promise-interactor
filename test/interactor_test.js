@@ -143,6 +143,28 @@ describe('Interactor', function() {
         done();
       });
     });
+
+    it('can reject when the state is RESOLVED', (done) => {
+      const instance = new TestInteractor({ rejectMe: false });
+      instance.rollback = function() {
+       
+        this.context.rolledback = true;
+        return new Promise((resolve) => {
+          this.context.rollbackState = this.state;
+          resolve();
+        });
+      };
+
+      instance.exec().then((instance) => {
+        expect(instance.state).to.equal(states.RESOLVED);
+        return instance.rollback();
+      }).then(() => {
+        expect(instance.context.rollbackState).to.equal(states.RESOLVED);
+        done();
+      }).catch((err) => {
+        expect(err).to.be.empty();
+      });
+    });
   });
 
   it('calls before if it exists', function(done) {

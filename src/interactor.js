@@ -103,11 +103,10 @@ class Interactor {
    * @param {*} err
    */
   reject(err) {
-    if (typeof this.rollback === 'function' && this.state == states.CALL) {
+    if (typeof this.rollback === 'function' && (this.state == states.CALL || this.state === states.RESOLVED)) {
       this.state = states.ROLLBACK;
       const rollbackPromise = this.rollback(err);
       if (promise.isPromise(rollbackPromise) === true) {
-
         rollbackPromise.then(() => {
           this[rejectSym](err);
           return null;
