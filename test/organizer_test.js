@@ -11,10 +11,10 @@ const expect = chai.expect;
 
 class TestInteractor extends Interactor {
   call() {
-
     this.context.called = true;
     this.context.count += 1;
-    if (this.context.rejectMe) {
+    const rejectOnCount = this.context.rejectOnCount || 1;
+    if (this.context.rejectMe && rejectOnCount === this.context.count) {
       this.reject(this.context.error || new Error('You told me to!'));
     } else if (this.context.rejectOn && this.context.rejectOn == this.context.count) {
       this.reject(this.context.error || new Error(`Reject on error count: ${this.context.count}`));
@@ -128,6 +128,7 @@ describe('Organizer', function() {
     it('called with rejection err', () => {
       class TestOrgWithRollback extends TestOrganizer {
         rollback() {
+          this.context.rolledBack = true;
           return Promise.resolve();
         }
       }
@@ -167,6 +168,27 @@ describe('Organizer', function() {
       org.organize = () => [TestInteractor];
       return org.exec().catch((err) => {
         expect(err.message).to.equal('alternate reject');
+      });
+    });
+
+    it('calls rollback on prior called interactors', () => {
+      class TestOrgWithRollback extends TestOrganizer {
+      }
+      class TestRolllBackInteractor extends TestInteractor {
+        rollback() {
+          this.context.rolledBack += 1;
+          this.context.rejectLabels.push(`reject-count-${this.context.rolledBack}`);
+          return Promise.resolve();
+        }
+      }
+      const error = new Error('squirrel!');
+      const org = new TestOrgWithRollback({ rolledBack: 0, count: 0, rejectLabels: [], rejectOnCount: 2, rejectMe: true, error });
+
+      org.organize = () => [TestRolllBackInteractor, TestRolllBackInteractor];
+      return org.exec().catch(() => {
+        expect(org.context.rejectLabels).to.contain('reject-count-1');
+        expect(org.context.rejectLabels).to.contain('reject-count-2');
+        expect(org.context.rolledBack).to.equal(2);
       });
     });
   });
