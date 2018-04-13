@@ -98,3 +98,6 @@ AuthUserOrganizer
     console.log(i.context);
   });
 ...
+```
+
+`rollback` for Organizer will call `rollback` for previously RESOLVED interactors with the current state. You can override this functionality by implementing your own `rollback` on Organizer.

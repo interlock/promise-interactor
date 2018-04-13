@@ -7,6 +7,7 @@ const rejectSym = Symbol.for('reject');
 class Organizer extends Interactor {
   constructor(context) {
     super(context);
+    this.currentInteractorIndex = -1;
   }
 
   organize() {
@@ -29,7 +30,8 @@ class Organizer extends Interactor {
       this.state = states.CALL;
       // insert attempts at running each interactor
       try {
-        this.organize().forEach((interactor) => {
+        this.organize().forEach((interactor, interactorIndex) => {
+          this.currentInteractorIndex = interactorIndex;
           root = root.then(() => {
             return interactor.exec(this.context);
           }).then((i) => {
@@ -51,6 +53,32 @@ class Organizer extends Interactor {
     });
 
     return this.promise;
+  }
+
+  rollback() {
+    if (this.currentInteractorIndex <= 0) return Promise.resolve();
+    const organizers = this.organize().slice(0, this.currentInteractorIndex).reverse();
+    const promise = new Promise((resolve, reject) => {
+      let root = Promise.resolve();
+    
+      try {
+        organizers.forEach((interactor) => {
+
+          const i = new interactor(this.context);
+          if (typeof i.rollback === 'function') {
+            root = root.then(() => {
+              return i.rollback();
+            });
+          }
+        });
+      } catch (err) {
+        return new Promise.reject(err);
+      }
+      
+      root.then(resolve).catch(reject); 
+    });
+    
+    return promise;
   }
 }
 
