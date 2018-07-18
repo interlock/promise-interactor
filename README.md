@@ -2,7 +2,6 @@
 [![Dependency Status](https://david-dm.org/interlock/promise-interactor.svg)](https://david-dm.org/interlock/promise-interactor)
 [![Dev Dependency Status](https://david-dm.org/interlock/promise-interactor/dev-status.svg)](https://david-dm.org/interlock/promise-interactor/dev-status)
 [![Greenkeeper badge](https://badges.greenkeeper.io/interlock/promise-interactor.svg)](https://greenkeeper.io/)
-[![Package Quality](http://npm.packagequality.com/shield/promise-interactor.svg)](http://packagequality.com/#?package=promise-interactor)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finterlock%2Fpromise-interactor.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finterlock%2Fpromise-interactor?ref=badge_shield)
 
 # Interactors
