@@ -1,33 +1,39 @@
-const Interactor = require('./interactor');
-const states = require('./states');
+import { Interactor, isIBefore, isIRollback, rejectSym, resolveSym } from './interactor';
+import { States } from './states';
 
-const resolveSym = Symbol.for('resolve');
-const rejectSym = Symbol.for('reject');
+export class Organizer extends Interactor {
+  protected interactors: Array<typeof Interactor>;
 
-class Organizer extends Interactor {
-  constructor(context) {
+  private currentInteractorIndex: number;
+
+  constructor(context: any) {
     super(context);
     this.currentInteractorIndex = -1;
+    this.interactors = [];
   }
 
-  organize() {
+  public organize(): Array<typeof Interactor> {
     // TODO setting this.interactors in constructor will be depreciated
-    if (this.interactors) return this.interactors;
+    if (this.interactors) {
+      return this.interactors;
+    }
     throw new Error('organize must be implemented');
   }
 
-  exec() {
+  public exec() {
     this.promise = new Promise((resolve, reject) => {
       this[resolveSym] = resolve;
       this[rejectSym] = reject;
       let root = Promise.resolve();
-      if (typeof this.before === 'function') {
-        this.state = states.BEFORE;
+      if (isIBefore(this)) {
+        this.state = States.BEFORE;
         root = root.then(() => {
-          return this.before();
+          if (isIBefore(this)) { // HACK double check because scoping kills the type inferance
+            return this.before();
+          }
         });
       }
-      this.state = states.CALL;
+      this.state = States.CALL;
       // insert attempts at running each interactor
       try {
         this.organize().forEach((interactor, interactorIndex) => {
@@ -36,17 +42,17 @@ class Organizer extends Interactor {
             return interactor.exec(this.context);
           }).then((i) => {
             this.context = i.context;
-            return null;
+            return;
           });
         });
       } catch (err) {
         this.reject(err);
-        return null;
+        return;
       }
 
       root.then(() => {
         this.resolve();
-        return null;
+        return;
       }).catch((err) => {
         this.reject(err);
       });
@@ -55,31 +61,32 @@ class Organizer extends Interactor {
     return this.promise;
   }
 
-  rollback() {
-    if (this.currentInteractorIndex <= 0) return Promise.resolve();
+  protected rollback() {
+    if (this.currentInteractorIndex <= 0) {
+      return Promise.resolve();
+    }
     const organizers = this.organize().slice(0, this.currentInteractorIndex).reverse();
     const promise = new Promise((resolve, reject) => {
       let root = Promise.resolve();
-    
+
       try {
         organizers.forEach((interactor) => {
-
           const i = new interactor(this.context);
-          if (typeof i.rollback === 'function') {
+          if (isIRollback(i)) {
             root = root.then(() => {
-              return i.rollback();
+              if (isIRollback(i)) {
+                return i.rollback();
+              }
             });
           }
         });
       } catch (err) {
-        return new Promise.reject(err);
+        return Promise.reject(err);
       }
-      
-      root.then(resolve).catch(reject); 
+
+      root.then(() => resolve()).catch(reject);
     });
-    
+
     return promise;
   }
 }
-
-module.exports = Organizer;

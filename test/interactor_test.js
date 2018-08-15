@@ -4,8 +4,8 @@ const spies = require('chai-spies');
 
 chai.use(spies);
 
-const Interactor = require('../src/interactor');
-const states = require('../src/states');
+const Interactor = require('../dist/').Interactor;
+const states = require('../dist/').States;
 
 const expect = chai.expect;
 
