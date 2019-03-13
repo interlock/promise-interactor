@@ -21,6 +21,7 @@
   "author": "June Sapara",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^11.11.3",
     "bluebird": "^3.5.0",
     "chai": "^4.0.1",
     "chai-spies": "git://github.com/chaijs/chai-spies.git#master",
