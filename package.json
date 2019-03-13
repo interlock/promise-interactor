@@ -1,6 +1,6 @@
 {
   "name": "promise-interactor",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Promise wrapped interactor pattern for NodeJS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
