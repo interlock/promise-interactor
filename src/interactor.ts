@@ -1,3 +1,4 @@
+import process from 'process';
 import { isPromise } from './promise';
 import { States } from './states';
 
@@ -61,6 +62,10 @@ export class Interactor {
 
   private _state: States = States.NEW;
 
+  private resolveCalled: boolean;
+
+  private rejectCalled: boolean;
+
   /**
    * context is where our inputs and outputs for this business logic
    * should live.
@@ -74,6 +79,9 @@ export class Interactor {
     this[rejectSym] = null;
     this.resolve = this.resolve.bind(this);
     this.reject = this.reject.bind(this);
+    this.resolveCalled = false;
+    this.rejectCalled = false;
+
   }
 
   /**
@@ -115,6 +123,13 @@ export class Interactor {
    * Access to the promise resolve, should be called from call() on success
    */
   protected resolve() {
+    if (this.rejectCalled) {
+      process.emitWarning('Promise Interactor reject already called before resolve');
+    }
+    if (this.resolveCalled) {
+      process.emitWarning('Promise Interactor resolve called multiple times');
+    }
+    this.resolveCalled = true;
     if (isIAfter(this)) {
       this.state = States.AFTER;
       const afterPromise = this.after();
@@ -137,6 +152,13 @@ export class Interactor {
    * @param {*} err
    */
   protected reject(err: Error) {
+    if (this.resolveCalled) {
+      process.emitWarning('Promise Interactor resolve already called before reject');
+    }
+    if (this.rejectCalled) {
+      process.emitWarning('Promise Interactor reject called multiple times');
+    }
+    this.rejectCalled = true;
     if (isIRollback(this) && (this.state === States.CALL || this.state === States.RESOLVED)) {
       this.state = States.ROLLBACK;
       const rollbackPromise = this.rollback(err);

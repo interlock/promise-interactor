@@ -18,6 +18,26 @@ class TestInteractor extends Interactor {
       Promise.reject(new Error('You told me to!')).catch(this.reject);
     } else if (this.context.resolveDeep) {
       Promise.resolve().then(this.resolve);
+    } else if (this.context.resolveTwice) {
+      Promise.resolve().then(() => {
+        this.resolve();
+      }).then(() => {
+        this.resolve();
+        if (this.context.resolveTwiceCallback) {
+          this.context.resolveTwiceCallback();
+        }
+      });
+    } else if (this.context.rejectTwice) {
+      Promise.resolve().then(() => {
+        this.reject();
+      }).then(() => {
+        this.reject();
+        if (this.context.rejectTwiceCallback) {
+          this.context.rejectTwiceCallback();
+        }
+      });
+    } else if (this.context.callback) {
+      this.context.callback(this);
     } else {
       this.resolve();
     }
@@ -81,6 +101,66 @@ describe('Interactor', function() {
       done();
     });
   });
+
+  describe('double warnings', () => {
+    beforeEach(() => {
+      chai.spy.on(process, 'emitWarning');
+    });
+
+    it('if resolve called more than once', function(done) {
+      const state = {
+        resolveTwice: true,
+        resolveTwiceCallback: () => {
+          expect(process.emitWarning).to.have.been.called();
+          done();
+        }
+      };
+      TestInteractor.exec(state).then(() => {
+      });
+    });
+
+    it('if reject called more than once', function(done) {
+      const state = {
+        rejectTwice: true,
+        rejectTwiceCallback: () => {
+          expect(process.emitWarning).to.have.been.called();
+          done();
+        }
+      };
+      TestInteractor.exec(state).then(() => {
+      });
+    });
+
+    it('if resolve then reject called', function(done) {
+      const state = {
+        callback: (interactor) => {
+          interactor.resolve();
+          interactor.reject();
+          expect(process.emitWarning).to.have.been.called();
+          done();
+        }
+      };
+      TestInteractor.exec(state).then(() => {
+      });
+    });
+
+    it('if reject then resolve called', function(done) {
+      const state = {
+        callback: (interactor) => {
+          interactor.reject();
+          interactor.resolve();
+          expect(process.emitWarning).to.have.been.called();
+          done();
+        }
+      };
+      TestInteractor.exec(state).then(() => {
+      });
+    });
+
+    afterEach(() => {
+      chai.spy.restore();
+    });
+  })
 
   context('rollback', () => {
 
