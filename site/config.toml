@@ -3,5 +3,11 @@ baseURL = "https://interlock.github.io/promise-interactor/"
 canonifyURLs = true
 languageCode = "en-us"
 title = "Promise Interactor"
+description = "Promise based interactor pattern"
 theme = "kube"
 publishDir = "../docs"
+
+# [[menu.main]]
+#    name = "Docs"
+#    weight = -100
+#    url = "/docs/"
