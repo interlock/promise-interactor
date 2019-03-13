@@ -3,13 +3,29 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://interlock.github.io/promise-interactor/docs/organizer/</loc>
+    <lastmod>2019-03-13T12:24:50-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://interlock.github.io/promise-interactor/docs/interactor/</loc>
+    <lastmod>2019-03-13T10:44:53-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://interlock.github.io/promise-interactor/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://interlock.github.io/promise-interactor/</loc>
+    <loc>https://interlock.github.io/promise-interactor/docs/</loc>
+    <lastmod>2019-03-13T12:24:50-07:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://interlock.github.io/promise-interactor/</loc>
+    <lastmod>2019-03-13T12:24:50-07:00</lastmod>
   </url>
   
   <url>
