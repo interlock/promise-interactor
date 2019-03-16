@@ -7,7 +7,8 @@
   "scripts": {
     "prepublishOnly": "tsc",
     "build": "tsc",
-    "test": "npm run build && npm run lint && mocha",
+    "atest": "npm run build && npm run lint && mocha",
+    "test": "npm run build && mocha --require ts-node/register test/**/*.ts",
     "lint": "tslint -p ./tsconfig.json"
   },
   "homepage": "https://interlock.github.io/promise-interactor",
@@ -22,11 +23,16 @@
   "author": "June Sapara",
   "license": "MIT",
   "devDependencies": {
+    "@types/bluebird": "^3.5.26",
+    "@types/chai": "^4.1.7",
+    "@types/chai-spies": "^1.0.0",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^11.11.3",
     "bluebird": "^3.5.3",
     "chai": "^4.2.0",
     "chai-spies": "git://github.com/chaijs/chai-spies.git#master",
     "mocha": "^6.0.0",
+    "ts-node": "^8.0.3",
     "tslint": "^5.14.0",
     "typescript": "^3.3.3333"
   }

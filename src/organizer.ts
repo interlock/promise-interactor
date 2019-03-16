@@ -1,12 +1,12 @@
-import { Interactor, isIBefore, isIRollback, rejectSym, resolveSym } from './interactor';
+import { Interactor, IRollback, isIBefore, isIRollback, rejectSym, resolveSym } from './interactor';
 import { States } from './states';
 
-export class Organizer extends Interactor {
+export class Organizer<T extends object = {}> extends Interactor<T> implements IRollback {
   protected interactors: Array<typeof Interactor>;
 
   private currentInteractorIndex: number;
 
-  constructor(context: any) {
+  constructor(context: T) {
     super(context);
     this.currentInteractorIndex = -1;
     this.interactors = [];
@@ -61,7 +61,7 @@ export class Organizer extends Interactor {
     return this.promise;
   }
 
-  protected rollback() {
+  public rollback() {
     if (this.currentInteractorIndex <= 0) {
       return Promise.resolve();
     }
