@@ -3,7 +3,7 @@ import chai from 'chai';
 const expect = chai.expect;
 
 import BlueBirdPromise from 'bluebird';
-import { isPromise } from '../dist/promise';
+import { isPromise } from '../src/promise';
 
 describe('promise', () => {
   context('isPromise', () => {

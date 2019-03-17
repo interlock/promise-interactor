@@ -6,7 +6,7 @@ export const resolveSym = Symbol('resolve');
 export const rejectSym = Symbol('reject');
 
 export interface IAfter {
-  after(): Promise<any> | undefined;
+  after(): Promise<any> | void;
 }
 
 export function isIAfter(object: any): object is IAfter {
@@ -14,7 +14,7 @@ export function isIAfter(object: any): object is IAfter {
 }
 
 export interface IBefore {
-  before(): Promise<any> | undefined;
+  before(): Promise<any> | void;
 }
 
 export function isIBefore(object: any): object is IBefore {
@@ -22,7 +22,7 @@ export function isIBefore(object: any): object is IBefore {
 }
 
 export interface IRollback {
-  rollback(error?: Error): Promise<any> | undefined;
+  rollback(error?: Error): Promise<any> | void;
 }
 
 export function isIRollback(object: any): object is IRollback {
