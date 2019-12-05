@@ -40,7 +40,7 @@ function isReject(object: any): object is IReject {
 /**
  * Interactor wraps business logic in a promise friendly package.
  */
-export class Interactor<T extends object = {}> {
+export class Interactor<T extends object = any> {
 
   set state(newState: States) {
     this._state = newState;
@@ -96,7 +96,7 @@ export class Interactor<T extends object = {}> {
    * Run this interactor
    * @returns {Interactor}
    */
-  public exec(): Promise<any> {
+  public exec(): Promise<this> {
     this.promise = new Promise((resolve, reject) => {
       this[resolveSym] = resolve;
       this[rejectSym] = reject;

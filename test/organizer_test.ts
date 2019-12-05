@@ -3,7 +3,8 @@ import spies from 'chai-spies';
 
 chai.use(spies);
 
-import { IBefore, IRollback, Interactor, Organizer } from '../src';
+import { IBefore, Interactor, IRollback, Organizer } from '../src';
+import { Test } from 'mocha';
 
 const expect = chai.expect;
 
@@ -29,7 +30,7 @@ class TestInteractor extends Interactor<ITest> {
     const rejectOnCount = this.context.rejectOnCount || 1;
     if (this.context.rejectMe && rejectOnCount === this.context.count) {
       this.reject(this.context.error || new Error('You told me to!'));
-    } else if (this.context.rejectOn && this.context.rejectOn == this.context.count) {
+    } else if (this.context.rejectOn && this.context.rejectOn === this.context.count) {
       this.reject(this.context.error || new Error(`Reject on error count: ${this.context.count}`));
     } else {
       this.resolve();
@@ -38,6 +39,14 @@ class TestInteractor extends Interactor<ITest> {
 }
 
 class TestOrganizer extends Organizer<ITest> {
+  private orgs: Array<new(context: ITest) => Interactor<ITest>> = [];
+  public push(org: new(context: ITest) => Interactor<ITest>) {
+    this.orgs.push(org);
+  }
+
+  public organize(): Array<new(context: ITest) => Interactor<ITest>> {
+    return this.orgs;
+  }
 }
 
 describe('Organizer', function() {
@@ -64,14 +73,13 @@ describe('Organizer', function() {
       rolledBackCount: 0,
       rejectLabels: [],
     };
-  })
+  });
 
   describe('organize', function() {
     it('calls organize to get interactors', () => {
       const org = new TestOrganizer(baseContext);
       org.organize = () => [TestInteractor];
       chai.spy.on(org, 'organize');
-
 
       return org.exec().then(() => {
         expect(org.organize).to.have.been.called();
@@ -87,7 +95,7 @@ describe('Organizer', function() {
     it('rejects if organize throws exception', () => {
       const org = new TestOrganizer(baseContext);
 
-      return org.exec().catch((err) => {
+      return org.exec().catch((err: any) => {
         expect(err.message).to.equal('organize must be implemented');
         return null;
       });
@@ -114,7 +122,7 @@ describe('Organizer', function() {
     baseContext.rejectOn = 2;
     const org = new TestOrganizer(baseContext);
     org.organize = () => [TestInteractor, TestInteractor, TestInteractor];
-    return org.exec().catch((error) => {
+    return org.exec().catch((error: any) => {
       expect(error.message).to.equal('Reject on error count: 2');
       expect(org.context.count).to.equal(2);
     });
@@ -171,7 +179,7 @@ describe('Organizer', function() {
       baseContext.rejectMe = true;
       baseContext.error = error;
       const org = new TestOrgWithRollback(baseContext);
-      org.organize = () => [TestInteractor];
+      org.push(TestInteractor);
       chai.spy.on(org, 'rollback');
       return org.exec().catch((err) => {
         expect(org.rollback).to.have.been.called.with(error);
@@ -187,7 +195,7 @@ describe('Organizer', function() {
       }
       baseContext.rejectMe = true;
       const org = new TestOrgWithRollback(baseContext);
-      org.organize = () => [TestInteractor];
+      org.push(TestInteractor);
       chai.spy.on(org, 'rollback');
       return org.exec().catch(() => {
         expect(org.rollback).to.have.been.called();
@@ -204,7 +212,7 @@ describe('Organizer', function() {
       }
       baseContext.rejectMe = true;
       const org = new TestOrgWithRollback(baseContext);
-      org.organize = () => [TestInteractor];
+      org.push(TestInteractor);
       return org.exec().catch((err) => {
         expect(err.message).to.equal('alternate reject');
       });
@@ -216,7 +224,7 @@ describe('Organizer', function() {
       class TestRolllBackInteractor extends TestInteractor implements IRollback {
         public rollback(): Promise<any> {
           this.context.rolledBackCount += 1;
-          this.context.rejectLabels.push(`reject-count-${this.context.rolledBack}`);
+          this.context.rejectLabels.push(`reject-count-${this.context.rolledBackCount}`);
           return Promise.resolve();
         }
       }
@@ -225,8 +233,8 @@ describe('Organizer', function() {
       baseContext.rejectMe = true;
       baseContext.error = error;
       const org = new TestOrgWithRollback(baseContext);
-
-      org.organize = () => [TestRolllBackInteractor, TestRolllBackInteractor];
+      org.push(TestRolllBackInteractor);
+      org.push(TestRolllBackInteractor);
       return org.exec().catch(() => {
         expect(org.context.rejectLabels).to.contain('reject-count-1');
         expect(org.context.rejectLabels).to.contain('reject-count-2');

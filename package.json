@@ -5,11 +5,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepublishOnly": "tsc",
-    "build": "tsc",
+    "prepublishOnly": "npm run clean && tsc",
+    "build": "npm run clean && tsc",
     "atest": "npm run build && npm run lint && mocha",
     "test": "npm run build && mocha --require ts-node/register test/**/*.ts",
-    "lint": "tslint -p ./tsconfig.json"
+    "lint": "tslint -p ./tsconfig.json",
+    "clean": "rm -rf ./dist/*"
   },
   "homepage": "https://interlock.github.io/promise-interactor",
   "repository": {

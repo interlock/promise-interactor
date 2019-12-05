@@ -1,7 +1,7 @@
 import chai from 'chai';
 import spies from 'chai-spies'; // TODO refactor in to test helper
 
-import { Interactor, IAfter, IBefore, IRollback, States as states } from '../src';
+import { IAfter, IBefore, Interactor, IRollback, States as states } from '../src';
 
 chai.use(spies);
 const expect = chai.expect;
@@ -9,8 +9,8 @@ const expect = chai.expect;
 /* tslint:disable:max-classes-per-file */
 
 interface ITestContext {
-  before: boolean,
-  after: boolean,
+  before: boolean;
+  after: boolean;
   called: boolean;
   rejectMe: boolean;
   rolledback: boolean;
