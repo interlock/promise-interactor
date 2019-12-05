@@ -1,12 +1,12 @@
 import process from 'process';
-import { isPromise } from './promise';
+import { IReject, IResolve, isPromise } from './promise';
 import { States } from './states';
 
 export const resolveSym = Symbol('resolve');
 export const rejectSym = Symbol('reject');
 
-interface IAfter {
-  after(): Promise<any>;
+export interface IAfter {
+  after(): Promise<any> | void;
 }
 
 export function isIAfter(object: any): object is IAfter {
@@ -14,31 +14,39 @@ export function isIAfter(object: any): object is IAfter {
 }
 
 export interface IBefore {
-  before(): Promise<any>;
+  before(): Promise<any> | void;
 }
 
 export function isIBefore(object: any): object is IBefore {
   return 'before' in object;
 }
 
-interface IRollback {
-  rollback(error?: Error): Promise<any>;
+export interface IRollback {
+  rollback(error?: Error): Promise<any> | void;
 }
 
 export function isIRollback(object: any): object is IRollback {
   return 'rollback' in object;
 }
 
+function isResolve(object: any): object is IResolve {
+  return object != null;
+}
+
+function isReject(object: any): object is IReject {
+  return object != null;
+}
+
 /**
  * Interactor wraps business logic in a promise friendly package.
  */
-export class Interactor {
+export class Interactor<T extends object = any> {
 
-  set state(newState) {
+  set state(newState: States) {
     this._state = newState;
   }
 
-  get state() {
+  get state(): States {
     return this._state;
   }
 
@@ -47,18 +55,18 @@ export class Interactor {
    * @param {object} context
    * @returns {Interactor}
    */
-  public static exec(context: any): Promise<any> {
+  public static exec<T extends object = any>(context: T): Promise<any> {
     const instance = new this(context);
     return instance.exec();
   }
 
-  public context: any;
+  public context: T;
 
   public promise: Promise<any> | any;
 
-  protected [resolveSym]: any;
+  protected [resolveSym]: null | IResolve;
 
-  protected [rejectSym]: any;
+  protected [rejectSym]: null | IReject;
 
   private _state: States = States.NEW;
 
@@ -71,7 +79,7 @@ export class Interactor {
    * should live.
    * @param {object} context
    */
-  constructor(context: any) {
+  constructor(context: T) {
     this.context = context || {};
     this.promise = null;
     this._state = States.NEW;
@@ -88,15 +96,15 @@ export class Interactor {
    * Run this interactor
    * @returns {Interactor}
    */
-  public exec(): Promise<any> {
+  public exec(): Promise<this> {
     this.promise = new Promise((resolve, reject) => {
       this[resolveSym] = resolve;
       this[rejectSym] = reject;
-      let root = Promise.resolve();
+      let root: Promise<any> = Promise.resolve();
       if (isIBefore(this)) {
         this.state = States.BEFORE;
         const beforePromise = this.before();
-        if (isPromise(beforePromise) === true) {
+        if (isPromise(beforePromise)) {
           root = beforePromise;
         }
       }
@@ -136,14 +144,14 @@ export class Interactor {
       if (isPromise(afterPromise) === true && afterPromise !== undefined) {
         afterPromise.then(() => {
           this.state = States.RESOLVED;
-          this[resolveSym](this);
+          this.callResolve();
           return null;
         }).catch(this.reject);
         return;
       }
     }
     this.state = States.RESOLVED;
-    this[resolveSym](this);
+    this.callResolve();
   }
 
   /**
@@ -151,7 +159,7 @@ export class Interactor {
    * Also, optionally calls instance method rollback it defined.
    * @param {*} err
    */
-  protected reject(err: Error) {
+  protected reject(err?: Error) {
     if (this.resolveCalled) {
       process.emitWarning('Promise Interactor resolve already called before reject');
     }
@@ -162,17 +170,35 @@ export class Interactor {
     if (isIRollback(this) && (this.state === States.CALL || this.state === States.RESOLVED)) {
       this.state = States.ROLLBACK;
       const rollbackPromise = this.rollback(err);
-      if (isPromise(rollbackPromise) === true) {
+      if (isPromise(rollbackPromise)) {
         rollbackPromise.then(() => {
-          this[rejectSym](err);
+          this.callReject(err);
           return null;
         }).catch((newErr: Error) => {
-          this[rejectSym](newErr);
+          this.callReject(newErr);
         });
         return; // early exit
       }
     }
     this.state = States.REJECTED;
-    this[rejectSym](err);
+    this.callReject(err);
+  }
+
+  private callResolve() {
+    const r = this[resolveSym];
+    if (isResolve(r)) {
+      r(this);
+    } else {
+      process.emitWarning('Attempt to call Promise Interactor resolve before it was initialized');
+    }
+  }
+
+  private callReject(err?: any) {
+    const r = this[rejectSym];
+    if (isReject(r)) {
+      r(err);
+    } else {
+      process.emitWarning('Attempt to call Promise Interactor reject before it was initialized');
+    }
   }
 }

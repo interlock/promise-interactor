@@ -1,16 +1,31 @@
-const chai = require('chai');
-// TODO refactor in to test helper
-const spies = require('chai-spies');
+import chai from 'chai';
+import spies from 'chai-spies'; // TODO refactor in to test helper
+
+import { IAfter, IBefore, Interactor, IRollback, States as states } from '../src';
 
 chai.use(spies);
-
-const Interactor = require('../dist/').Interactor;
-const states = require('../dist/').States;
-
 const expect = chai.expect;
 
-class TestInteractor extends Interactor {
-  call() {
+/* tslint:disable:max-classes-per-file */
+
+interface ITestContext {
+  before: boolean;
+  after: boolean;
+  called: boolean;
+  rejectMe: boolean;
+  rolledback: boolean;
+  rollbackState: states | undefined;
+  rejectDeep: boolean;
+  resolveDeep: boolean;
+  resolveTwice: boolean;
+  resolveTwiceCallback: (() => void) | null;
+  rejectTwice: boolean;
+  rejectTwiceCallback: (() => void) | null;
+  callback: null | ((value: TestInteractor) => Promise<any>);
+}
+
+class TestInteractor extends Interactor<ITestContext> implements IRollback, IAfter, IBefore {
+  public call() {
     this.context.called = true;
     if (this.context.rejectMe) {
       this.reject(new Error('You told me to!'));
@@ -37,30 +52,61 @@ class TestInteractor extends Interactor {
         }
       });
     } else if (this.context.callback) {
-      this.context.callback(this);
+      this.context.callback(this).then(this.resolve).catch(this.reject);
     } else {
       this.resolve();
     }
   }
+
+  public before(): Promise<any> | void {
+    return Promise.resolve();
+  }
+
+  public after(): Promise<any> | void {
+    return Promise.resolve();
+  }
+
+  public rollback(error?: Error): Promise<any> | void {
+    return Promise.resolve();
+  }
 }
 
 describe('Interactor', function() {
+  let baseContext: ITestContext;
+
+  beforeEach(() => {
+    baseContext = {
+      before: false,
+      after: false,
+      called: false,
+      rejectMe: false,
+      rolledback: false,
+      rollbackState: undefined,
+      rejectDeep: false,
+      resolveDeep: false,
+      resolveTwice: false,
+      resolveTwiceCallback: null,
+      rejectTwice: false,
+      rejectTwiceCallback: null,
+      callback: null,
+    };
+  });
 
   it('exec returns a promise', function() {
-    const i = new TestInteractor();
+    const i = new TestInteractor(baseContext);
     const p = i.exec();
     expect(i).to.instanceOf(TestInteractor);
     expect(p).to.instanceOf(Promise);
   });
 
   it('has promise attribute on instance', function() {
-    const i = new TestInteractor();
+    const i = new TestInteractor(baseContext);
     i.exec();
     expect(i.promise).to.instanceOf(Promise);
   });
 
   it('wraps the call and still calls it', function(done) {
-    const i = new TestInteractor();
+    const i = new TestInteractor(baseContext);
     i.exec().then((inst) => {
       expect(inst.context.called).to.equal(true);
       done();
@@ -68,7 +114,7 @@ describe('Interactor', function() {
   });
 
   it('returns context and interactor instance', function(done) {
-    const i = new TestInteractor();
+    const i = new TestInteractor(baseContext);
     i.exec().then((inst) => {
       expect(i).to.equal(inst);
       done();
@@ -76,98 +122,43 @@ describe('Interactor', function() {
   });
 
   it('can init from static exec', function(done) {
-    TestInteractor.exec().then((inst) => {
+    TestInteractor.exec(baseContext).then((inst) => {
       expect(inst.context.called).to.equal(true);
       done();
     });
   });
 
   it('can handle a reject', function(done) {
-    TestInteractor.exec({ rejectMe: true }).catch((err) => {
+    baseContext.rejectMe = true;
+    TestInteractor.exec(baseContext).catch((err) => {
       expect(err.message).to.eq('You told me to!');
       done();
     });
   });
 
   it('has reject bound to instance context', function(done) {
-    TestInteractor.exec({ rejectDeep: true }).catch((err) => {
+    baseContext.rejectDeep = true;
+    TestInteractor.exec(baseContext).catch((err) => {
       expect(err.message).to.eq('You told me to!');
       done();
     });
   });
 
   it('has resolve bound to instance context', function(done) {
-    TestInteractor.exec({ resolveDeep: true }).then(() => {
+    baseContext.resolveDeep = true;
+    TestInteractor.exec(baseContext).then(() => {
       done();
     });
   });
 
-  describe('double warnings', () => {
-    beforeEach(() => {
-      chai.spy.on(process, 'emitWarning');
-    });
-
-    it('if resolve called more than once', function(done) {
-      const state = {
-        resolveTwice: true,
-        resolveTwiceCallback: () => {
-          expect(process.emitWarning).to.have.been.called();
-          done();
-        }
-      };
-      TestInteractor.exec(state).then(() => {
-      });
-    });
-
-    it('if reject called more than once', function(done) {
-      const state = {
-        rejectTwice: true,
-        rejectTwiceCallback: () => {
-          expect(process.emitWarning).to.have.been.called();
-          done();
-        }
-      };
-      TestInteractor.exec(state).then(() => {
-      });
-    });
-
-    it('if resolve then reject called', function(done) {
-      const state = {
-        callback: (interactor) => {
-          interactor.resolve();
-          interactor.reject();
-          expect(process.emitWarning).to.have.been.called();
-          done();
-        }
-      };
-      TestInteractor.exec(state).then(() => {
-      });
-    });
-
-    it('if reject then resolve called', function(done) {
-      const state = {
-        callback: (interactor) => {
-          interactor.reject();
-          interactor.resolve();
-          expect(process.emitWarning).to.have.been.called();
-          done();
-        }
-      };
-      TestInteractor.exec(state).then(() => {
-      });
-    });
-
-    afterEach(() => {
-      chai.spy.restore();
-    });
-  })
-
   context('rollback', () => {
 
     it('gets called if it exists for an error', function(done) {
-      const instance = new TestInteractor({ rejectMe: true });
-      instance.rollback = function() {
+      baseContext.rejectMe = true;
+      const instance = new TestInteractor(baseContext);
+      instance.rollback = function(err?: Error): Promise<any> {
         this.context.rolledback = true;
+        return Promise.resolve();
       };
       chai.spy.on(instance, 'rollback');
       instance.exec().then(() => {
@@ -180,7 +171,8 @@ describe('Interactor', function() {
     });
 
     it('handles call with promise return', function(done) {
-      const instance = new TestInteractor({ rejectMe: true });
+      baseContext.rejectMe = true;
+      const instance = new TestInteractor(baseContext);
       instance.rollback = function() {
         this.context.rolledback = true;
         return new Promise((resolve) => {
@@ -195,7 +187,8 @@ describe('Interactor', function() {
     });
 
     it('passed original error down if no rejects occure', (done) => {
-      const instance = new TestInteractor({ rejectMe: true });
+      baseContext.rejectMe = true;
+      const instance = new TestInteractor(baseContext);
       instance.rollback = function() {
         this.context.rolledback = true;
         return new Promise((resolve) => {
@@ -210,7 +203,8 @@ describe('Interactor', function() {
     });
 
     it('uses promise reject as new error', function(done) {
-      const instance = new TestInteractor({ rejectMe: true });
+      baseContext.rejectMe = true;
+      const instance = new TestInteractor(baseContext);
       instance.rollback = function() {
         this.context.rolledback = true;
         return new Promise((resolve, reject) => {
@@ -225,9 +219,9 @@ describe('Interactor', function() {
     });
 
     it('can reject when the state is RESOLVED', (done) => {
-      const instance = new TestInteractor({ rejectMe: false });
+      baseContext.rejectMe = true;
+      const instance = new TestInteractor(baseContext);
       instance.rollback = function() {
-       
         this.context.rolledback = true;
         return new Promise((resolve) => {
           this.context.rollbackState = this.state;
@@ -242,13 +236,14 @@ describe('Interactor', function() {
         expect(instance.context.rollbackState).to.equal(states.RESOLVED);
         done();
       }).catch((err) => {
-        expect(err).to.be.empty();
+        expect(err).to.be.empty;
+        done();
       });
     });
   });
 
   it('calls before if it exists', function(done) {
-    const instance = new TestInteractor({ rejectMe: false });
+    const instance = new TestInteractor(baseContext);
     instance.before = function() {
       this.context.before = true;
       return new Promise((resolve) => {
@@ -263,7 +258,7 @@ describe('Interactor', function() {
   });
 
   it('calls after if it exists', function(done) {
-    const instance = new TestInteractor({ rejectMe: false });
+    const instance = new TestInteractor(baseContext);
     instance.after = function() {
       this.context.after = true;
       return new Promise((resolve) => {
@@ -274,65 +269,6 @@ describe('Interactor', function() {
     instance.exec().then(() => {
       expect(instance.after).to.have.been.called();
       done();
-    });
-  });
-
-  describe('state', () => {
-
-    it('initially NEW', () => {
-      const i = new TestInteractor();
-      expect(i.state).to.equal(states.NEW);
-    });
-
-    it('is BEFORE when calling before', () => {
-      const i = new TestInteractor();
-      i.before = () => {
-        expect(i.state).to.equal(states.BEFORE);
-      };
-      return i.exec();
-    });
-
-    it('is CALL when in main call function', () => {
-      const i = new TestInteractor();
-      i.call = function() {
-        expect(i.state).to.equal(states.CALL);
-        this.resolve();
-      };
-      return i.exec();
-    });
-
-    it('is AFTER when calling after', () => {
-      const i = new TestInteractor();
-      i.after = () => {
-        expect(i.state).to.equal(states.AFTER);
-      };
-      return i.exec();
-    });
-
-    it('is RESOLVED when completed', (done) => {
-      const i = new TestInteractor();
-      i.exec().then(() => {
-        expect(i.state).to.equal(states.RESOLVED);
-        done();
-      });
-    });
-
-    it('is ROLLBACK when calling rollback', (done) => {
-      const i = new TestInteractor({rejectMe: true});
-      i.rollback = function() {
-        expect(i.state).to.equal(states.ROLLBACK);
-      };
-      i.exec().catch(() => {
-        done();
-      });
-    });
-
-    it('is REJECTED when not completed', (done) => {
-      const i = new TestInteractor({rejectMe: true});
-      i.exec().catch(() => {
-        expect(i.state).to.equal(states.REJECTED);
-        done();
-      });
     });
   });
 });

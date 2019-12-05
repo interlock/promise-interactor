@@ -1,14 +1,15 @@
-const chai = require('chai');
+import chai from 'chai';
+
 const expect = chai.expect;
 
-const isPromise = require('../dist/promise').isPromise;
-const BlueBirdPromise = require('bluebird');
+import BlueBirdPromise from 'bluebird';
+import { isPromise } from '../src/promise';
 
 describe('promise', () => {
   context('isPromise', () => {
 
     it('detects built-in promise', () => {
-      const p = new global.Promise((r) => { r(); });
+      const p = new Promise((r) => { r(); });
       expect(isPromise(p)).to.be.true;
     });
 
