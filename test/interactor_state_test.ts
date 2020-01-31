@@ -51,7 +51,7 @@ describe('Interactor states', function() {
       }
     }
     const i = new TestCallInteractor(baseContext);
-    i.exec().then(() => {
+    return i.exec().then(() => {
       expect(state).to.equal(states.CALL);
     });
   });
@@ -63,8 +63,8 @@ describe('Interactor states', function() {
         state = this.state;
       }
     }
-    const i = new TestInteractor(baseContext);
-    i.exec().then(() => {
+    const i = new TestAfterInteractor(baseContext);
+    return i.exec().then(() => {
       expect(state).to.equal(states.AFTER);
     });
   });
