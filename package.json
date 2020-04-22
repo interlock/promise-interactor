@@ -28,7 +28,7 @@
     "@types/chai": "^4.1.7",
     "@types/chai-spies": "^1.0.0",
     "@types/mocha": "^7.0.0",
-    "@types/node": "^13.1.0",
+    "@types/node": "^13.13.2",
     "bluebird": "^3.5.3",
     "chai": "^4.2.0",
     "chai-spies": "git://github.com/chaijs/chai-spies.git#master",
