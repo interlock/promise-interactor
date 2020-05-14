@@ -24,7 +24,7 @@
   "author": "June Sapara",
   "license": "MIT",
   "devDependencies": {
-    "@types/bluebird": "^3.5.26",
+    "@types/bluebird": "^3.5.31",
     "@types/chai": "^4.1.7",
     "@types/chai-spies": "^1.0.0",
     "@types/mocha": "^7.0.0",
