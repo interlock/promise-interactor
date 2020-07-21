@@ -24,7 +24,7 @@ export declare class Interactor<T extends object = any> {
      * @param {object} context
      * @returns {Interactor}
      */
-    static exec<T extends object = any>(context: T): Promise<any>;
+    static exec<T extends object = any>(context: T): Promise<Interactor<T>>;
     context: T;
     promise: Promise<any> | any;
     protected [resolveSym]: null | IResolve;

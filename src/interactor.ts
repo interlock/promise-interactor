@@ -55,7 +55,7 @@ export class Interactor<T extends object = any> {
    * @param {object} context
    * @returns {Interactor}
    */
-  public static exec<T extends object = any>(context: T): Promise<any> {
+  public static exec<T extends object = any>(context: T): Promise<Interactor<T>> {
     const instance = new this(context);
     return instance.exec();
   }
