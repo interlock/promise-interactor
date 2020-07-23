@@ -1,24 +1,16 @@
 import { Interactor, IRollback, isIBefore, isIRollback, rejectSym, resolveSym } from './interactor';
 import { States } from './states';
 
-export class Organizer<T extends object = {}> extends Interactor<T> implements IRollback {
-  protected interactors: Array<new(context: T) => Interactor<T>>;
+export abstract class Organizer<T extends object = {}> extends Interactor<T> implements IRollback {
 
   private currentInteractorIndex: number;
 
   constructor(context: T) {
     super(context);
     this.currentInteractorIndex = -1;
-    this.interactors = [];
   }
 
-  public organize(): Array<new(context: T) => Interactor<T>> {
-    // TODO setting this.interactors in constructor will be depreciated
-    if (this.interactors) {
-      return this.interactors;
-    }
-    throw new Error('organize must be implemented');
-  }
+  public abstract organize(): Array<new(context: T) => Interactor<T>>;
 
   public createInteractor(i: new(context: T) => Interactor<T>): Interactor<T> {
     return new i(this.context);

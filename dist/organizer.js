@@ -6,14 +6,6 @@ class Organizer extends interactor_1.Interactor {
     constructor(context) {
         super(context);
         this.currentInteractorIndex = -1;
-        this.interactors = [];
-    }
-    organize() {
-        // TODO setting this.interactors in constructor will be depreciated
-        if (this.interactors) {
-            return this.interactors;
-        }
-        throw new Error('organize must be implemented');
     }
     createInteractor(i) {
         return new i(this.context);
