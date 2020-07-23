@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/interlock/promise-interactor.svg?branch=master)](https://travis-ci.org/interlock/promise-interactor)
+![Node.js CI](https://github.com/interlock/promise-interactor/workflows/Node.js%20CI/badge.svg)
 [![Dependency Status](https://david-dm.org/interlock/promise-interactor.svg)](https://david-dm.org/interlock/promise-interactor)
 [![Dev Dependency Status](https://david-dm.org/interlock/promise-interactor/dev-status.svg)](https://david-dm.org/interlock/promise-interactor/dev-status)
 [![Greenkeeper badge](https://badges.greenkeeper.io/interlock/promise-interactor.svg)](https://greenkeeper.io/)
