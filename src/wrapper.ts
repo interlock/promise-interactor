@@ -3,9 +3,12 @@ import { Interactor, interactorConstructor } from './interactor';
 type wrapFn<O, I> = (context: O) => I;
 type unwrapFn<I, O> = (context: I, origContext: O) => void;
 
-export function interactorWrapper<O extends object, I extends object>(interactor: interactorConstructor<I>, wrap?: wrapFn<O, I>, unwrap?: unwrapFn<I, O>): interactorConstructor<O> {
+export function interactorWrapper<O extends object, I extends object>(
+  interactor: interactorConstructor<I>,
+  wrap?: wrapFn<O, I>,
+  unwrap?: unwrapFn<I, O>): interactorConstructor<O> {
   return class extends Interactor<O> {
-    async call() {
+    public async call() {
       if (wrap === undefined) {
         wrap = this.defaultWrap;
       }
@@ -13,10 +16,8 @@ export function interactorWrapper<O extends object, I extends object>(interactor
         unwrap = this.defaultUnwrap;
       }
       const preContext: I = wrap(this.context);
-      console.log(`pre: ${JSON.stringify(preContext)}`);
       const inst = new interactor(preContext);
       await inst.exec();
-      console.log(`post: ${JSON.stringify(inst.context)}`);
       unwrap(inst.context, this.context);
       this.resolve();
     }
@@ -26,7 +27,7 @@ export function interactorWrapper<O extends object, I extends object>(interactor
     }
 
     private defaultUnwrap: unwrapFn<I, O> = (context, origContext) => {
-      Object.assign(origContext, context)
+      Object.assign(origContext, context);
     }
-  }
+  };
 }

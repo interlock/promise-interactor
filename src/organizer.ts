@@ -1,4 +1,7 @@
-import { Interactor, IRollback, isIBefore, isIRollback, rejectSym, resolveSym, interactorConstructor } from './interactor';
+import {
+  Interactor, interactorConstructor, IRollback,
+  isIBefore, isIRollback, rejectSym, resolveSym,
+} from './interactor';
 import { States } from './states';
 
 export abstract class Organizer<T extends object = {}> extends Interactor<T> implements IRollback {
