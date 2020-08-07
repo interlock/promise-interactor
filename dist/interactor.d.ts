@@ -2,6 +2,7 @@ import { IReject, IResolve } from './promise';
 import { States } from './states';
 export declare const resolveSym: unique symbol;
 export declare const rejectSym: unique symbol;
+export declare type interactorConstructor<T extends object> = new (context: T) => Interactor<T>;
 export interface IAfter {
     after(): Promise<any> | void;
 }
