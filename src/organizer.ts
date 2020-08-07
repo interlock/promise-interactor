@@ -1,4 +1,4 @@
-import { Interactor, IRollback, isIBefore, isIRollback, rejectSym, resolveSym } from './interactor';
+import { Interactor, IRollback, isIBefore, isIRollback, rejectSym, resolveSym, interactorConstructor } from './interactor';
 import { States } from './states';
 
 export abstract class Organizer<T extends object = {}> extends Interactor<T> implements IRollback {
@@ -10,9 +10,9 @@ export abstract class Organizer<T extends object = {}> extends Interactor<T> imp
     this.currentInteractorIndex = -1;
   }
 
-  public abstract organize(): Array<new(context: T) => Interactor<T>>;
+  public abstract organize(): Array<interactorConstructor<T>>;
 
-  public createInteractor(i: new(context: T) => Interactor<T>): Interactor<T> {
+  public createInteractor(i: interactorConstructor<T>): Interactor<T> {
     return new i(this.context);
   }
 
