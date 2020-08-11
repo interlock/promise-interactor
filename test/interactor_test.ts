@@ -22,6 +22,7 @@ interface ITestContext {
   rejectTwice: boolean;
   rejectTwiceCallback: (() => void) | null;
   callback: null | ((value: TestInteractor) => Promise<any>);
+  throwException: boolean;
 }
 
 class TestInteractor extends Interactor<ITestContext> implements IRollback, IAfter, IBefore {
@@ -53,6 +54,8 @@ class TestInteractor extends Interactor<ITestContext> implements IRollback, IAft
       });
     } else if (this.context.callback) {
       this.context.callback(this).then(this.resolve).catch(this.reject);
+    } else if (this.context.throwException) {
+      throw new Error('I threw an exception');
     } else {
       this.resolve();
     }
@@ -89,6 +92,7 @@ describe('Interactor', function() {
       rejectTwice: false,
       rejectTwiceCallback: null,
       callback: null,
+      throwException: false,
     };
   });
 
@@ -136,6 +140,13 @@ describe('Interactor', function() {
     });
   });
 
+  it('can handle exception thrown', function(done) {
+    baseContext.throwException = true;
+    TestInteractor.exec(baseContext).catch((err) => {
+      expect(err.message).to.eq('I threw an exception');
+      done();
+    });
+  });
   it('has reject bound to instance context', function(done) {
     baseContext.rejectDeep = true;
     TestInteractor.exec(baseContext).catch((err) => {
