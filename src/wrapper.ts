@@ -15,10 +15,19 @@ export function interactorWrapper<O extends object, I extends object>(
       if (unwrap === undefined) {
         unwrap = this.defaultUnwrap;
       }
-      const preContext: I = wrap(this.context);
+      let preContext: I;
+      try {
+         preContext = wrap(this.context);
+      } catch (err) {
+        return this.reject(err);
+      }
       const inst = new interactor(preContext);
       await inst.exec();
-      unwrap(inst.context, this.context);
+      try {
+        unwrap(inst.context, this.context);
+      } catch (err) {
+        return this.reject(err);
+      }
       this.resolve();
     }
 

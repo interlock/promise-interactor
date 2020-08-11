@@ -88,6 +88,47 @@ describe('wrapper', () => {
     expect(inst.context.catHappy).to.be.true;
   });
 
+  it('catches exception and rejects from wrap', async () => {
+    const orgCtx: IOrgContext = {
+      catName: 'Nimh',
+      catTreat: 'fish',
+      pew: 2
+    };
+
+    const c = interactorWrapper<IOrgContext, ITestContext>(TestInteractor, (context) => {
+      throw new Error('kitten overload');
+    }, (context, origContext) => {
+      origContext.catHappy = context.catHappy;
+    });
+    const inst = new c(orgCtx)
+    try {
+      await inst.exec();
+    } catch (err) {
+      expect(err.message).to.be.equal('kitten overload');
+    }
+  });
+
+  it('catches exception and rejects from unwrap', async () => {
+    const orgCtx: IOrgContext = {
+      catName: 'Nimh',
+      catTreat: 'fish',
+      pew: 2
+    };
+
+    const c = interactorWrapper<IOrgContext, ITestContext>(TestInteractor, (context) => {
+      return { catTreat: context.catTreat || '' }
+    }, (context, origContext) => {
+      throw new Error('Cat refuses to unbox');
+    });
+    const inst = new c(orgCtx)
+    try {
+      await inst.exec();
+    } catch (err) {
+      expect(err.message).to.be.equal('Cat refuses to unbox');
+    }
+  });
+
+
   it('can be included with other interactors', async () => {
     const orgCtx: IOrgContext = {
       catName: 'Nimh',
