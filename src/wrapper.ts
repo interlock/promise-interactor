@@ -8,7 +8,7 @@ export function interactorWrapper<O extends object, I extends object>(
   wrap?: wrapFn<O, I>,
   unwrap?: unwrapFn<I, O>): interactorConstructor<O> {
   return class extends Interactor<O> {
-    public async call() {
+    public call() {
       if (wrap === undefined) {
         wrap = this.defaultWrap;
       }
@@ -17,18 +17,24 @@ export function interactorWrapper<O extends object, I extends object>(
       }
       let preContext: I;
       try {
-         preContext = wrap(this.context);
+        preContext = wrap(this.context);
       } catch (err) {
         return this.reject(err);
       }
       const inst = new interactor(preContext);
-      await inst.exec();
-      try {
-        unwrap(inst.context, this.context);
-      } catch (err) {
-        return this.reject(err);
-      }
-      this.resolve();
+
+
+      inst.exec().then(() => {
+        try {
+          // @ts-ignore
+          unwrap(inst.context, this.context);
+        } catch (err) {
+          return this.reject(err);
+        }
+        this.resolve();
+      }).catch((err) => {
+        this.reject(err);
+      });
     }
 
     private defaultWrap: wrapFn<O, I> = (context) => {

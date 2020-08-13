@@ -5,7 +5,7 @@ import { States } from './states';
 export const resolveSym = Symbol('resolve');
 export const rejectSym = Symbol('reject');
 
-export type interactorConstructor<T extends object> = new(context: T) => Interactor<T>;
+export type interactorConstructor<T extends object> = new (context: T) => Interactor<T>;
 
 export interface IAfter {
   after(): Promise<any> | void;

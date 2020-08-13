@@ -74,7 +74,7 @@ class TestInteractor extends Interactor<ITestContext> implements IRollback, IAft
   }
 }
 
-describe('Interactor', function() {
+describe('Interactor', function () {
   let baseContext: ITestContext;
 
   beforeEach(() => {
@@ -96,20 +96,20 @@ describe('Interactor', function() {
     };
   });
 
-  it('exec returns a promise', function() {
+  it('exec returns a promise', function () {
     const i = new TestInteractor(baseContext);
     const p = i.exec();
     expect(i).to.instanceOf(TestInteractor);
     expect(p).to.instanceOf(Promise);
   });
 
-  it('has promise attribute on instance', function() {
+  it('has promise attribute on instance', function () {
     const i = new TestInteractor(baseContext);
     i.exec();
     expect(i.promise).to.instanceOf(Promise);
   });
 
-  it('wraps the call and still calls it', function(done) {
+  it('wraps the call and still calls it', function (done) {
     const i = new TestInteractor(baseContext);
     i.exec().then((inst) => {
       expect(inst.context.called).to.equal(true);
@@ -117,7 +117,7 @@ describe('Interactor', function() {
     });
   });
 
-  it('returns context and interactor instance', function(done) {
+  it('returns context and interactor instance', function (done) {
     const i = new TestInteractor(baseContext);
     i.exec().then((inst) => {
       expect(i).to.equal(inst);
@@ -125,14 +125,14 @@ describe('Interactor', function() {
     });
   });
 
-  it('can init from static exec', function(done) {
+  it('can init from static exec', function (done) {
     TestInteractor.exec(baseContext).then((inst) => {
       expect(inst.context.called).to.equal(true);
       done();
     });
   });
 
-  it('can handle a reject', function(done) {
+  it('can handle a reject', function (done) {
     baseContext.rejectMe = true;
     TestInteractor.exec(baseContext).catch((err) => {
       expect(err.message).to.eq('You told me to!');
@@ -140,14 +140,15 @@ describe('Interactor', function() {
     });
   });
 
-  it('can handle exception thrown', function(done) {
+  it('can handle exception thrown', function (done) {
     baseContext.throwException = true;
     TestInteractor.exec(baseContext).catch((err) => {
       expect(err.message).to.eq('I threw an exception');
       done();
     });
   });
-  it('has reject bound to instance context', function(done) {
+
+  it('has reject bound to instance context', function (done) {
     baseContext.rejectDeep = true;
     TestInteractor.exec(baseContext).catch((err) => {
       expect(err.message).to.eq('You told me to!');
@@ -155,7 +156,7 @@ describe('Interactor', function() {
     });
   });
 
-  it('has resolve bound to instance context', function(done) {
+  it('has resolve bound to instance context', function (done) {
     baseContext.resolveDeep = true;
     TestInteractor.exec(baseContext).then(() => {
       done();
@@ -164,10 +165,10 @@ describe('Interactor', function() {
 
   context('rollback', () => {
 
-    it('gets called if it exists for an error', function(done) {
+    it('gets called if it exists for an error', function (done) {
       baseContext.rejectMe = true;
       const instance = new TestInteractor(baseContext);
-      instance.rollback = function(err?: Error): Promise<any> {
+      instance.rollback = function (err?: Error): Promise<any> {
         this.context.rolledback = true;
         return Promise.resolve();
       };
@@ -181,10 +182,10 @@ describe('Interactor', function() {
       });
     });
 
-    it('handles call with promise return', function(done) {
+    it('handles call with promise return', function (done) {
       baseContext.rejectMe = true;
       const instance = new TestInteractor(baseContext);
-      instance.rollback = function() {
+      instance.rollback = function () {
         this.context.rolledback = true;
         return new Promise((resolve) => {
           resolve();
@@ -200,7 +201,7 @@ describe('Interactor', function() {
     it('passed original error down if no rejects occure', (done) => {
       baseContext.rejectMe = true;
       const instance = new TestInteractor(baseContext);
-      instance.rollback = function() {
+      instance.rollback = function () {
         this.context.rolledback = true;
         return new Promise((resolve) => {
           resolve();
@@ -213,10 +214,10 @@ describe('Interactor', function() {
       });
     });
 
-    it('uses promise reject as new error', function(done) {
+    it('uses promise reject as new error', function (done) {
       baseContext.rejectMe = true;
       const instance = new TestInteractor(baseContext);
-      instance.rollback = function() {
+      instance.rollback = function () {
         this.context.rolledback = true;
         return new Promise((resolve, reject) => {
           reject(new Error('cat in the hat'));
@@ -232,7 +233,7 @@ describe('Interactor', function() {
     it('can reject when the state is RESOLVED', (done) => {
       baseContext.rejectMe = true;
       const instance = new TestInteractor(baseContext);
-      instance.rollback = function() {
+      instance.rollback = function () {
         this.context.rolledback = true;
         return new Promise((resolve) => {
           this.context.rollbackState = this.state;
@@ -253,9 +254,9 @@ describe('Interactor', function() {
     });
   });
 
-  it('calls before if it exists', function(done) {
+  it('calls before if it exists', function (done) {
     const instance = new TestInteractor(baseContext);
-    instance.before = function() {
+    instance.before = function () {
       this.context.before = true;
       return new Promise((resolve) => {
         resolve();
@@ -268,9 +269,9 @@ describe('Interactor', function() {
     });
   });
 
-  it('calls after if it exists', function(done) {
+  it('calls after if it exists', function (done) {
     const instance = new TestInteractor(baseContext);
-    instance.after = function() {
+    instance.after = function () {
       this.context.after = true;
       return new Promise((resolve) => {
         resolve();
