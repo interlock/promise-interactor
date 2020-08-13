@@ -132,7 +132,7 @@ export class Interactor<T extends object = any> {
   /**
    * Access to the promise resolve, should be called from call() on success
    */
-  protected resolve() {
+  protected resolve(merge: Partial<T> | void): void {
     if (this.rejectCalled) {
       process.emitWarning('Promise Interactor reject already called before resolve');
     }
@@ -140,6 +140,9 @@ export class Interactor<T extends object = any> {
       process.emitWarning('Promise Interactor resolve called multiple times');
     }
     this.resolveCalled = true;
+    if (merge) {
+      Object.assign(this.context, merge);
+    }
     if (isIAfter(this)) {
       this.state = States.AFTER;
       const afterPromise = this.after();

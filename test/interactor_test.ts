@@ -2,6 +2,7 @@ import chai from 'chai';
 import spies from 'chai-spies'; // TODO refactor in to test helper
 
 import { IAfter, IBefore, Interactor, IRollback, States as states } from '../src';
+import { any } from 'bluebird';
 
 chai.use(spies);
 const expect = chai.expect;
@@ -23,6 +24,8 @@ interface ITestContext {
   rejectTwiceCallback: (() => void) | null;
   callback: null | ((value: TestInteractor) => Promise<any>);
   throwException: boolean;
+  resolveWithValue?: Partial<this>;
+  extra: any;
 }
 
 class TestInteractor extends Interactor<ITestContext> implements IRollback, IAfter, IBefore {
@@ -43,6 +46,8 @@ class TestInteractor extends Interactor<ITestContext> implements IRollback, IAft
           this.context.resolveTwiceCallback();
         }
       });
+    } else if (this.context.resolveWithValue) {
+      this.resolve(this.context.resolveWithValue);
     } else if (this.context.rejectTwice) {
       Promise.resolve().then(() => {
         this.reject();
@@ -93,6 +98,8 @@ describe('Interactor', function () {
       rejectTwiceCallback: null,
       callback: null,
       throwException: false,
+      resolveWithValue: undefined,
+      extra: any
     };
   });
 
@@ -125,6 +132,16 @@ describe('Interactor', function () {
     });
   });
 
+
+  it('resolve with partial merges to context', function (done) {
+    baseContext.resolveWithValue = { extra: true };
+    const i = new TestInteractor(baseContext);
+    i.exec().then((inst) => {
+      expect(inst.context.extra).to.be.true;
+      done();
+    });
+  });
+  
   it('can init from static exec', function (done) {
     TestInteractor.exec(baseContext).then((inst) => {
       expect(inst.context.called).to.equal(true);
