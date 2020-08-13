@@ -1,3 +1,8 @@
+# 2.2.4
+
+* Resolve can optionally take a partial of the context to merge with the context
+* Fixed issue with thrown exceptions in interactWrapper interactors not properly rejecting
+
 # 2.2.3
 
 * Handle exceptions throw from the wrap/unwrap functions with interactionWrapper
