@@ -132,6 +132,7 @@ describe('Interactor', function () {
     });
   });
 
+
   it('resolve with partial merges to context', function (done) {
     baseContext.resolveWithValue = { extra: true };
     const i = new TestInteractor(baseContext);
@@ -140,7 +141,7 @@ describe('Interactor', function () {
       done();
     });
   });
-
+  
   it('can init from static exec', function (done) {
     TestInteractor.exec(baseContext).then((inst) => {
       expect(inst.context.called).to.equal(true);
@@ -163,6 +164,7 @@ describe('Interactor', function () {
       done();
     });
   });
+
   it('has reject bound to instance context', function (done) {
     baseContext.rejectDeep = true;
     TestInteractor.exec(baseContext).catch((err) => {
