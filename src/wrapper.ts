@@ -23,7 +23,6 @@ export function interactorWrapper<O extends object, I extends object>(
       }
       const inst = new interactor(preContext);
 
-
       inst.exec().then(() => {
         try {
           // @ts-ignore
