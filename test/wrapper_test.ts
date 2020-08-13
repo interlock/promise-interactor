@@ -23,6 +23,8 @@ class TestInteractor extends Interactor<ITestContext> {
   call() {
     if (this.context.catTreat === 'fish') {
       this.context.catHappy = true;
+    } else if (this.context.catTreat === 'kibble') {
+      throw new Error('Unacceptable Cat treat!');
     }
     this.resolve();
   }
@@ -88,7 +90,7 @@ describe('wrapper', () => {
     expect(inst.context.catHappy).to.be.true;
   });
 
-  it('catches exception and rejects from wrap', async () => {
+  it('catches exception in wrap', async () => {
     const orgCtx: IOrgContext = {
       catName: 'Nimh',
       catTreat: 'fish',
@@ -108,7 +110,7 @@ describe('wrapper', () => {
     }
   });
 
-  it('catches exception and rejects from unwrap', async () => {
+  it('catches exception in unwrap', async () => {
     const orgCtx: IOrgContext = {
       catName: 'Nimh',
       catTreat: 'fish',
@@ -128,7 +130,20 @@ describe('wrapper', () => {
     }
   });
 
+  it('rejects if wrapped interactor throws', (done) => {
+    const orgCtx: IOrgContext = {
+      catName: 'Nimh',
+      catTreat: 'kibble',
+      pew: 2,
+    };
 
+    const c = interactorWrapper<IOrgContext, ITestContext>(TestInteractor);
+    const inst = new c(orgCtx);
+    inst.exec().catch((err) => {
+      expect(err.message).to.be.eq('Unacceptable Cat treat!');
+      done();
+    })
+  });
   it('can be included with other interactors', async () => {
     const orgCtx: IOrgContext = {
       catName: 'Nimh',
