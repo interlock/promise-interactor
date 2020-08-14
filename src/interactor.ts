@@ -112,9 +112,16 @@ export class Interactor<T extends object = any> {
       }
       root.then(() => {
         this.state = States.CALL;
-        this.call();
-        return null;
-      }).catch((err) => {
+        try {
+          const callPromise = this.call();
+          if (isPromise(callPromise)) {
+            return callPromise;
+          }
+        } catch (err) {
+          return Promise.reject(err);
+        }
+        return Promise.resolve();;
+      }).catch((err: Error) => {
         this.reject(err);
       });
 
@@ -125,7 +132,7 @@ export class Interactor<T extends object = any> {
   /**
    * Abstract method that should be implemented in the child
    */
-  public call() {
+  public call(): void | Promise<void> {
     throw new Error('Interactor requires call to be implemented');
   }
 

@@ -24,12 +24,13 @@ interface ITestContext {
   rejectTwiceCallback: (() => void) | null;
   callback: null | ((value: TestInteractor) => Promise<any>);
   throwException: boolean;
+  throwExceptionAwaited: boolean;
   resolveWithValue?: Partial<this>;
   extra: any;
 }
 
 class TestInteractor extends Interactor<ITestContext> implements IRollback, IAfter, IBefore {
-  public call() {
+  public async call() {
     this.context.called = true;
     if (this.context.rejectMe) {
       this.reject(new Error('You told me to!'));
@@ -61,6 +62,11 @@ class TestInteractor extends Interactor<ITestContext> implements IRollback, IAft
       this.context.callback(this).then(this.resolve).catch(this.reject);
     } else if (this.context.throwException) {
       throw new Error('I threw an exception');
+    } else if (this.context.throwExceptionAwaited) {
+      function a(): Promise<void> {
+        throw new Error('Exception')
+      }
+      await a();
     } else {
       this.resolve();
     }
@@ -98,6 +104,7 @@ describe('Interactor', function () {
       rejectTwiceCallback: null,
       callback: null,
       throwException: false,
+      throwExceptionAwaited: false,
       resolveWithValue: undefined,
       extra: any
     };
@@ -132,7 +139,6 @@ describe('Interactor', function () {
     });
   });
 
-
   it('resolve with partial merges to context', function (done) {
     baseContext.resolveWithValue = { extra: true };
     const i = new TestInteractor(baseContext);
@@ -141,7 +147,7 @@ describe('Interactor', function () {
       done();
     });
   });
-  
+
   it('can init from static exec', function (done) {
     TestInteractor.exec(baseContext).then((inst) => {
       expect(inst.context.called).to.equal(true);
@@ -165,9 +171,23 @@ describe('Interactor', function () {
     });
   });
 
+  it('can handle awaited rejection', function (done) {
+    baseContext.throwExceptionAwaited = true;
+    TestInteractor.exec(baseContext).then(() => {
+      expect(true).to.be.false;
+      done();
+    }).catch((err) => {
+      expect(err.message).to.eq('Exception');
+      done();
+    });
+  });
+
   it('has reject bound to instance context', function (done) {
     baseContext.rejectDeep = true;
-    TestInteractor.exec(baseContext).catch((err) => {
+    TestInteractor.exec(baseContext).then(() => {
+      expect(true).to.be.false;
+      done();
+    }).catch((err) => {
       expect(err.message).to.eq('You told me to!');
       done();
     });
