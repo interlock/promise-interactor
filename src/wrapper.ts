@@ -45,3 +45,28 @@ export function interactorWrapper<O extends object, I extends object>(
     }
   };
 }
+
+/**
+ *
+ * @param interactor Interactor
+ * @param conditionalFn function to inspect the context, returning true if we want to continue with this interactor
+ */
+export function interactorConditional<I extends object>(
+  interactor: interactorConstructor<I>,
+  conditionalFn: (ctx: I) => boolean
+): interactorConstructor<I> {
+  return class extends Interactor<I> {
+    call() {
+      if (conditionalFn(this.context) === false) {
+        return this.resolve();
+      }
+      const inst = new interactor(this.context);
+      inst
+        .exec()
+        .then(() => {
+          this.resolve();
+        })
+        .catch(this.reject);
+    }
+  };
+}

@@ -164,7 +164,7 @@ export class Interactor<T extends object = any> {
    * Also, optionally calls instance method rollback it defined.
    * @param {*} err
    */
-  protected reject(err?: Error) {
+  protected reject(err?: Error): void {
     if (this.resolveCalled) {
       process.emitWarning('Promise Interactor resolve already called before reject');
     }
