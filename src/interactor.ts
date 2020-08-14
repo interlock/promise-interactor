@@ -120,7 +120,7 @@ export class Interactor<T extends object = any> {
         } catch (err) {
           return Promise.reject(err);
         }
-        return Promise.resolve();;
+        return Promise.resolve();
       }).catch((err: Error) => {
         this.reject(err);
       });
