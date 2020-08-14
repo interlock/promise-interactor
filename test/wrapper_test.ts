@@ -1,6 +1,6 @@
-import chai from 'chai';
+import chaifrom 'chai';
 import spies from 'chai-spies'; // TODO refactor in to test helper
-import { Interactor, interactorWrapper, interactorConditional, Organizer } from '../src';
+import { Interactor, interactorWrapper, interactorConditional, Organizer, interactorResultWrapper } from '../src';
 
 chai.use(spies);
 const expect = chai.expect;
@@ -23,6 +23,7 @@ class TestInteractor extends Interactor<ITestContext> {
     if (this.context.catTreat === 'fish') {
       this.context.catHappy = true;
     } else if (this.context.catTreat === 'kibble') {
+      this.context.catHappy = false;
       throw new Error('Unacceptable Cat treat!');
     }
     this.resolve();
@@ -168,4 +169,36 @@ describe('wrappers', () => {
       expect(inst.context.pew).to.eq(1);
     });
   });
+
+  describe('interactorResultWrapper', () => {
+    it('calls handlerFunction on resolve', async () => {
+      let called = false;
+      const interactor = interactorResultWrapper(TestInteractor2, (err, ctx, resolve, reject) => {
+        called = true;
+        resolve();
+      });
+      const inst = await (new interactor({ pew: 2 }).exec());
+      expect(called).to.be.true;
+    });
+
+    it('can make a reject a resolve', async () => {
+      const interactor = interactorResultWrapper(TestInteractor, (err, ctx, resolve, reject) => {
+        resolve();
+      });
+      const inst = await (new interactor({ catTreat: 'kibble' }).exec());
+      expect(inst.context.catHappy).to.be.false;
+    });
+
+    it('can make a resovle a reject', async () => {
+      const interactor = interactorResultWrapper(TestInteractor2, (err, ctx, resolve, reject) => {
+        reject(new Error('Nope'));
+      });
+      try {
+        const inst = await (new interactor({ pew: 2 }).exec());
+        expect(inst.context.pew).to.eq(2);
+      } catch (err) {
+        expect(err.message).to.eq('Nope');
+      }
+    })
+  })
 });

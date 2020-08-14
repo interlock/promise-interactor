@@ -70,3 +70,33 @@ export function interactorConditional<I extends object>(
     }
   };
 }
+
+export type resultHandlerFn<I> = (
+  err: Error | undefined,
+  ctx: I,
+  resolve: (merge: Partial<I> | void) => void,
+  reject: (err?: Error) => void,
+) => void;
+
+/**
+ * Allows for adding a layer where the result of the interactor can be examined and re-evaluated
+ * @param interactor Interactor
+ * @param resultHandler function that will handle the result
+ */
+export function interactorResultWrapper<I extends object>(
+  interactor: interactorConstructor<I>,
+  resultHandler: resultHandlerFn<I>,
+): interactorConstructor<I> {
+  return class extends Interactor<I> {
+    public call() {
+      const inst = new interactor(this.context);
+      inst
+        .exec().then(() => {
+          resultHandler(undefined, this.context, this.resolve, this.reject);
+        })
+        .catch((err) => {
+          resultHandler(err, this.context, this.resolve, this.reject);
+        });
+    }
+  };
+}
