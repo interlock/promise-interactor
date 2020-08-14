@@ -53,10 +53,10 @@ export function interactorWrapper<O extends object, I extends object>(
  */
 export function interactorConditional<I extends object>(
   interactor: interactorConstructor<I>,
-  conditionalFn: (ctx: I) => boolean
+  conditionalFn: (ctx: I) => boolean,
 ): interactorConstructor<I> {
   return class extends Interactor<I> {
-    call() {
+    public call() {
       if (conditionalFn(this.context) === false) {
         return this.resolve();
       }

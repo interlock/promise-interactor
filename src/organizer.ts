@@ -13,7 +13,7 @@ export abstract class Organizer<T extends object = {}> extends Interactor<T> imp
     this.currentInteractorIndex = -1;
   }
 
-  public abstract organize(): Array<interactorConstructor<T>>;
+  public abstract organize(): interactorConstructor<T>[];
 
   public createInteractor(i: interactorConstructor<T>): Interactor<T> {
     return new i(this.context);

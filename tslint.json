@@ -5,8 +5,19 @@
     ],
     "jsRules": {},
     "rules": {
-        "quotemark": [true, "single"],
-        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-leading-underscore"
+        ],
+        "max-classes-per-file": [
+            false
+        ]
     },
     "rulesDirectory": []
 }
