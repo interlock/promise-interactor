@@ -1,4 +1,4 @@
-import chaifrom 'chai';
+import chai from 'chai';
 import spies from 'chai-spies'; // TODO refactor in to test helper
 import { Interactor, interactorWrapper, interactorConditional, Organizer, interactorResultWrapper } from '../src';
 
