@@ -1,3 +1,7 @@
+# 2.2.5
+
+* Addition of interactorConditional and interactorResultWrapper
+
 # 2.2.4
 
 * Resolve can optionally take a partial of the context to merge with the context
