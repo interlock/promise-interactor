@@ -1,3 +1,7 @@
+# 2.2.6
+
+* Fixed bug related to handling an async call method on Interactor
+
 # 2.2.5
 
 * Addition of interactorConditional and interactorResultWrapper
