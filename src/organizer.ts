@@ -4,9 +4,17 @@ import {
 } from './interactor';
 import { States } from './states';
 
+export type organizerConstructor<T extends object> = new (context: T) => Organizer<T>;
+
 export abstract class Organizer<T extends object = {}> extends Interactor<T> implements IRollback {
 
   private currentInteractorIndex: number;
+
+  public static exec<T extends object = any>(context: T): Promise<Organizer<T>> {
+    const c = this as unknown as organizerConstructor<T>;
+    const instance = new c(context);
+    return instance.exec();
+  }
 
   constructor(context: T) {
     super(context);
@@ -61,32 +69,23 @@ export abstract class Organizer<T extends object = {}> extends Interactor<T> imp
     return this.promise;
   }
 
-  public rollback() {
+  public async rollback(origError?: any) {
     if (this.currentInteractorIndex <= 0) {
       return Promise.resolve();
     }
     const organizers = this.organize().slice(0, this.currentInteractorIndex).reverse();
-    const promise = new Promise((resolve, reject) => {
-      let root = Promise.resolve();
 
-      try {
-        organizers.forEach((interactor) => {
-          const i = new interactor(this.context);
-          if (isIRollback(i)) {
-            root = root.then(() => {
-              if (isIRollback(i)) {
-                return i.rollback();
-              }
-            });
-          }
-        });
-      } catch (err) {
-        return Promise.reject(err);
+    let err: any;
+    for (let i = 0; i < organizers.length; i++) {
+      const interactor = organizers[i];
+      const inter = new interactor(this.context);
+      if (isIRollback(inter)) {
+        try {
+          const res = await inter.rollback();
+        } catch (_err) {
+          err = _err;
+        }
       }
-
-      root.then(() => resolve()).catch(reject);
-    });
-
-    return promise;
+    }
   }
 }

@@ -39,17 +39,17 @@ class TestInteractor extends Interactor<ITest> {
 }
 
 class TestOrganizer extends Organizer<ITest> {
-  private orgs: Array<new(context: ITest) => Interactor<ITest>> = [];
-  public push(org: new(context: ITest) => Interactor<ITest>) {
+  private orgs: Array<new (context: ITest) => Interactor<ITest>> = [];
+  public push(org: new (context: ITest) => Interactor<ITest>) {
     this.orgs.push(org);
   }
 
-  public organize(): Array<new(context: ITest) => Interactor<ITest>> {
+  public organize(): Array<new (context: ITest) => Interactor<ITest>> {
     return this.orgs;
   }
 }
 
-describe('Organizer', function() {
+describe('Organizer', function () {
   let baseContext: ITest = {
     called: false,
     count: 0,
@@ -75,7 +75,7 @@ describe('Organizer', function() {
     };
   });
 
-  describe('organize', function() {
+  describe('organize', function () {
     it('calls organize to get interactors', () => {
       const org = new TestOrganizer(baseContext);
       org.organize = () => [TestInteractor];
@@ -102,7 +102,7 @@ describe('Organizer', function() {
     });
   });
 
-  it('single works', function() {
+  it('single works', function () {
     const org = new TestOrganizer(baseContext);
     org.organize = () => [TestInteractor];
     return org.exec().then((org) => {
@@ -110,7 +110,7 @@ describe('Organizer', function() {
     });
   });
 
-  it('multiple works', function() {
+  it('multiple works', function () {
     const org = new TestOrganizer(baseContext);
     org.organize = () => [TestInteractor, TestInteractor];
     return org.exec().then((org) => {
@@ -118,7 +118,7 @@ describe('Organizer', function() {
     });
   });
 
-  it('multiple does not chain calls on reject', function() {
+  it('multiple does not chain calls on reject', function () {
     baseContext.rejectOn = 2;
     const org = new TestOrganizer(baseContext);
     org.organize = () => [TestInteractor, TestInteractor, TestInteractor];
@@ -239,6 +239,35 @@ describe('Organizer', function() {
         expect(org.context.rejectLabels).to.contain('reject-count-1');
         expect(org.context.rejectLabels).to.contain('reject-count-2');
         expect(org.context.rolledBackCount).to.equal(2);
+      });
+    });
+
+    it('returns original rejection error, if all rollbacks resolve', () => {
+      class TestOrgWithRollback extends TestOrganizer {
+      }
+      const error = new Error('squirrel!');
+      baseContext.rejectOnCount = 2;
+      baseContext.rejectMe = true;
+      baseContext.error = error;
+      const org = new TestOrgWithRollback(baseContext);
+      org.push(TestInteractor);
+      org.push(TestInteractor);
+      return org.exec().catch((err) => {
+        expect(err).to.equal(error);
+      });
+    });
+    it('returns new rejection error', () => {
+      class TestOrgWithRollback extends TestOrganizer {
+      }
+      const error = new Error('squirrel!');
+      baseContext.rejectOnCount = 2;
+      baseContext.rejectMe = true;
+      baseContext.error = error;
+      const org = new TestOrgWithRollback(baseContext);
+      org.push(TestInteractor);
+      org.push(TestInteractor);
+      return org.exec().catch((err) => {
+        expect(err).to.equal(error);
       });
     });
   });
