@@ -32,7 +32,7 @@
     "@types/node": "^14.0.1",
     "bluebird": "^3.5.3",
     "chai": "^4.2.0",
-    "chai-spies": "git://github.com/chaijs/chai-spies.git#master",
+    "chai-spies": "https://github.com/chaijs/chai-spies.git#master",
     "mocha": "^9.0.0",
     "ts-node": "^8.0.3",
     "tslint": "^5.14.0",
